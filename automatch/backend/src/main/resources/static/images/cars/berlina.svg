@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eaf2fb"/>
+      <stop offset="1" stop-color="#cfe0f3"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" fill="url(#sky)"/>
+  <circle cx="350" cy="42" r="22" fill="#ffe9a8"/>
+  <rect y="192" width="400" height="48" fill="#d7dde2"/>
+  <rect y="192" width="400" height="4" fill="#b8c2cb"/>
+  <ellipse cx="200" cy="199" rx="160" ry="10" fill="#16202b" opacity="0.12"/>
+  <rect x="38" y="128" width="324" height="50" rx="18" fill="#3a4a5c"/>
+  <rect x="100" y="84" width="170" height="54" rx="16" fill="#3a4a5c"/>
+  <rect x="258" y="112" width="78" height="26" rx="10" fill="#3a4a5c"/>
+  <polygon points="112,94 240,94 232,124 122,124" fill="#bfe3f5"/>
+  <rect x="38" y="160" width="324" height="6" fill="#c7ced4"/>
+  <circle cx="118" cy="180" r="24" fill="#222831"/>
+  <circle cx="118" cy="180" r="11" fill="#9aa0a6"/>
+  <circle cx="322" cy="180" r="24" fill="#222831"/>
+  <circle cx="322" cy="180" r="11" fill="#9aa0a6"/>
+  <rect x="336" y="150" width="16" height="9" rx="3" fill="#ffd166"/>
+  <rect x="32" y="150" width="14" height="9" rx="3" fill="#a4161a"/>
+</svg>
