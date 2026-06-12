@@ -14,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -180,6 +181,6 @@ public class CarService {
         car.setMaintenancePerYear(request.maintenancePerYear());
         car.setDepreciation5y(request.depreciation5y());
         car.setDescription(request.description());
-        car.setImageUrls(request.imageUrls() == null ? List.of() : request.imageUrls());
+        car.setImageUrls(request.imageUrls() == null ? new ArrayList<>() : new ArrayList<>(request.imageUrls()));
     }
 }

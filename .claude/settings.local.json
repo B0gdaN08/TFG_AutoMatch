@@ -78,7 +78,9 @@
       "Bash(curl -s http://localhost:8080/v3/api-docs -o /tmp/openapi.json)",
       "Bash(node -e ' *)",
       "Bash(curl -s http://localhost:8080/v3/api-docs -o openapi.json)",
-      "Bash(powershell -Command \"Stop-Process -Id 16944 -Force\")"
+      "Bash(powershell -Command \"Stop-Process -Id 16944 -Force\")",
+      "Bash(awk -F, 'NR>1 {miss[$2]+=$8; cov[$2]+=$9} END {for \\(p in miss\\) printf \"%-35s missed=%d covered=%d total=%d pct=%.1f%%\\\\n\", p, miss[p], cov[p], miss[p]+cov[p], 100*cov[p]/\\(miss[p]+cov[p]\\)}' target/site/jacoco/jacoco.csv)",
+      "Bash(awk -F, 'NR>1 {miss+=$8; cov+=$9} END {printf \"TOTAL missed=%d covered=%d total=%d pct=%.1f%%\\\\n\", miss, cov, miss+cov, 100*cov/\\(miss+cov\\)}' target/site/jacoco/jacoco.csv)"
     ]
   }
 }
