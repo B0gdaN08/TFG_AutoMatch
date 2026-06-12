@@ -8,6 +8,10 @@ import es.urjc.automatch.model.CarType;
 import es.urjc.automatch.model.FuelType;
 import es.urjc.automatch.security.AuthUtils;
 import es.urjc.automatch.service.CarService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -17,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cars")
+@Tag(name = "Coches", description = "Catálogo de coches y anuncios de usuarios")
 public class CarController {
 
     private final CarService carService;
@@ -25,6 +30,7 @@ public class CarController {
         this.carService = carService;
     }
 
+    @Operation(summary = "Listar coches", description = "Devuelve los coches visibles, con filtros opcionales de búsqueda, tipo, combustible y precio máximo")
     @GetMapping
     public List<CarResponse> list(@RequestParam(required = false) String search,
                           @RequestParam(required = false) CarType type,
@@ -35,6 +41,11 @@ public class CarController {
         return carService.toResponseList(cars, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 
+    @Operation(summary = "Comparar coches", description = "Devuelve los datos de 2 o 3 coches para compararlos lado a lado")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Coches encontrados"),
+            @ApiResponse(responseCode = "400", description = "Número de coches a comparar fuera de rango (2-3)")
+    })
     @GetMapping("/compare")
     public List<CarResponse> compare(@RequestParam List<Long> ids, Authentication auth) {
         if (ids.size() < 2 || ids.size() > 3) {
@@ -48,18 +59,22 @@ public class CarController {
 
     // --- Anuncios de usuarios ---
 
+    @Operation(summary = "Mis anuncios", description = "Devuelve los anuncios publicados por el usuario autenticado")
     @GetMapping("/mine")
     public List<CarResponse> mine(Authentication auth) {
         var cars = carService.findMine(auth.getName());
         return carService.toResponseList(cars, auth.getName(), AuthUtils.isAdmin(auth));
     }
 
+    @Operation(summary = "Anuncios pendientes", description = "Devuelve los anuncios de usuarios pendientes de moderación (solo administradores)")
     @GetMapping("/pending")
     public List<CarResponse> pending(Authentication auth) {
         var cars = carService.findPending();
         return carService.toResponseList(cars, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 
+    @Operation(summary = "Detalle de un coche", description = "Devuelve los datos de un coche por su id")
+    @ApiResponse(responseCode = "404", description = "El coche no existe o no está visible para el usuario actual")
     @GetMapping("/{id}")
     public CarResponse get(@PathVariable Long id, Authentication auth) {
         String email = AuthUtils.emailOrNull(auth);
@@ -69,6 +84,11 @@ public class CarController {
     }
 
     /** Cualquier usuario autenticado publica su coche en venta (queda pendiente de revision). */
+    @Operation(summary = "Publicar un anuncio", description = "Crea un anuncio de coche del usuario autenticado, que queda pendiente de revisión")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Anuncio creado"),
+            @ApiResponse(responseCode = "400", description = "Datos del coche inválidos")
+    })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CarResponse createListing(@Valid @RequestBody CarRequest request, Authentication auth) {
@@ -77,6 +97,11 @@ public class CarController {
     }
 
     /** El admin anade un coche directamente al catalogo oficial. */
+    @Operation(summary = "Añadir coche al catálogo", description = "Crea un coche del catálogo oficial directamente aprobado (solo administradores)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Coche del catálogo creado"),
+            @ApiResponse(responseCode = "400", description = "Datos del coche inválidos")
+    })
     @PostMapping("/catalog")
     @ResponseStatus(HttpStatus.CREATED)
     public CarResponse createCatalogCar(@Valid @RequestBody CarRequest request, Authentication auth) {
@@ -84,18 +109,24 @@ public class CarController {
         return carService.toResponse(car, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 
+    @Operation(summary = "Actualizar un coche", description = "Modifica los datos de un coche existente (solo administradores)")
+    @ApiResponse(responseCode = "404", description = "El coche no existe")
     @PutMapping("/{id}")
     public CarResponse update(@PathVariable Long id, @Valid @RequestBody CarRequest request, Authentication auth) {
         var car = carService.update(id, request);
         return carService.toResponse(car, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 
+    @Operation(summary = "Aprobar anuncio", description = "Aprueba un anuncio pendiente de un usuario (solo administradores)")
+    @ApiResponse(responseCode = "404", description = "El coche no existe")
     @PutMapping("/{id}/approve")
     public CarResponse approve(@PathVariable Long id, Authentication auth) {
         var car = carService.setStatus(id, CarStatus.APPROVED);
         return carService.toResponse(car, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 
+    @Operation(summary = "Rechazar anuncio", description = "Rechaza un anuncio pendiente de un usuario (solo administradores)")
+    @ApiResponse(responseCode = "404", description = "El coche no existe")
     @PutMapping("/{id}/reject")
     public CarResponse reject(@PathVariable Long id, Authentication auth) {
         var car = carService.setStatus(id, CarStatus.REJECTED);
@@ -103,6 +134,12 @@ public class CarController {
     }
 
     /** El dueño puede borrar su anuncio; el admin puede borrar cualquier coche. */
+    @Operation(summary = "Eliminar un coche", description = "Elimina un anuncio propio o, si es administrador, cualquier coche")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Coche eliminado"),
+            @ApiResponse(responseCode = "403", description = "No tienes permiso para eliminar este coche"),
+            @ApiResponse(responseCode = "404", description = "El coche no existe")
+    })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id, Authentication auth) {

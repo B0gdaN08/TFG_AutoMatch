@@ -67,7 +67,18 @@
       "Bash(git restore *)",
       "Bash(mvn -q compile)",
       "Bash(java -version)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(powershell -Command \"Get-Process -Id 10568 | Select-Object Id,ProcessName,StartTime,Path | Format-List\")",
+      "Bash(powershell -Command \"Stop-Process -Id 10568 -Force\")",
+      "Bash(curl -s -o /dev/null -w \"swagger-ui.html: %{http_code}\\\\n\" http://localhost:8080/swagger-ui.html)",
+      "Bash(curl -s -o /dev/null -w \"swagger-ui/index.html: %{http_code}\\\\n\" http://localhost:8080/swagger-ui/index.html)",
+      "Bash(curl -s -o /dev/null -w \"v3/api-docs: %{http_code}\\\\n\" http://localhost:8080/v3/api-docs)",
+      "Bash(curl -s http://localhost:8080/v3/api-docs)",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s http://localhost:8080/v3/api-docs -o /tmp/openapi.json)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s http://localhost:8080/v3/api-docs -o openapi.json)",
+      "Bash(powershell -Command \"Stop-Process -Id 16944 -Force\")"
     ]
   }
 }
