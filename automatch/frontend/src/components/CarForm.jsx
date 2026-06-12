@@ -152,7 +152,7 @@ export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar
       </label>
       <label className="field">
         Precio (€)
-        <input type="number" min="0" step="100" value={values.price}
+        <input type="number" min="1" max="1000000" step="100" value={values.price}
                onChange={(e) => setField('price', e.target.value)} required />
       </label>
       <label className="field">
@@ -181,22 +181,22 @@ export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar
       </label>
       <label className="field">
         Consumo ({values.fuel === 'ELECTRICO' ? 'kWh' : 'l'}/100km)
-        <input type="number" min="0" step="0.1" value={values.consumption}
+        <input type="number" min="0.1" step="0.1" value={values.consumption}
                onChange={(e) => setField('consumption', e.target.value)} required />
       </label>
       <label className="field">
         Potencia (CV)
-        <input type="number" min="0" step="1" value={values.powerCv}
+        <input type="number" min="1" max="2000" step="1" value={values.powerCv}
                onChange={(e) => setField('powerCv', e.target.value)} required />
       </label>
       <label className="field">
         Maletero (l)
-        <input type="number" min="0" step="1" value={values.trunkLiters}
+        <input type="number" min="1" step="1" value={values.trunkLiters}
                onChange={(e) => setField('trunkLiters', e.target.value)} required />
       </label>
       <label className="field">
         Plazas
-        <input type="number" min="1" max="9" step="1" value={values.seats}
+        <input type="number" min="2" max="9" step="1" value={values.seats}
                onChange={(e) => setField('seats', e.target.value)} required />
       </label>
       <label className="field">

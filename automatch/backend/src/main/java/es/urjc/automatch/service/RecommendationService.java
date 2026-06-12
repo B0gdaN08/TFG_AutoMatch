@@ -31,12 +31,14 @@ public class RecommendationService {
             "price", "efficiency", "reliability", "safety", "space", "performance", "equipment");
 
     private final CarRepository carRepository;
+    private final CarService carService;
 
-    public RecommendationService(CarRepository carRepository) {
+    public RecommendationService(CarRepository carRepository, CarService carService) {
         this.carRepository = carRepository;
+        this.carService = carService;
     }
 
-    public List<RecommendationResult> recommend(RecommendationRequest request) {
+    public List<RecommendationResult> recommend(RecommendationRequest request, String email, boolean isAdmin) {
         List<Car> candidates = carRepository.findByStatus(CarStatus.APPROVED).stream()
                 .filter(car -> request.maxPrice() == null || car.getPrice() <= request.maxPrice())
                 .filter(car -> request.types() == null || request.types().isEmpty()
@@ -74,7 +76,7 @@ public class RecommendationService {
                 weighted += weights.get(criterion) * value;
             }
             double score = Math.round(weighted / totalWeight * 1000.0) / 10.0; // 0..100, 1 decimal
-            results.add(new RecommendationResult(car, score, criteriaScores));
+            results.add(new RecommendationResult(carService.toResponse(car, email, isAdmin), score, criteriaScores));
         }
 
         results.sort(Comparator.comparingDouble(RecommendationResult::score).reversed());

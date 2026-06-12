@@ -1,7 +1,9 @@
 package es.urjc.automatch.controller;
 
 import es.urjc.automatch.dto.TcoResult;
+import es.urjc.automatch.security.AuthUtils;
 import es.urjc.automatch.service.TcoService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,7 +19,8 @@ public class TcoController {
     @GetMapping("/{carId}")
     public TcoResult calculate(@PathVariable Long carId,
                                @RequestParam(defaultValue = "5") int years,
-                               @RequestParam(defaultValue = "15000") int km) {
-        return tcoService.calculate(carId, years, km);
+                               @RequestParam(defaultValue = "15000") int km,
+                               Authentication auth) {
+        return tcoService.calculate(carId, years, km, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 }

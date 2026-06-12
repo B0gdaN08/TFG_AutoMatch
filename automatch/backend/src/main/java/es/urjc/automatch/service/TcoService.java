@@ -20,7 +20,7 @@ public class TcoService {
         this.carService = carService;
     }
 
-    public TcoResult calculate(Long carId, int years, int kmPerYear) {
+    public TcoResult calculate(Long carId, int years, int kmPerYear, String email, boolean isAdmin) {
         if (years < 1 || years > 15) {
             throw new IllegalArgumentException("El periodo debe estar entre 1 y 15 anos");
         }
@@ -28,7 +28,7 @@ public class TcoService {
             throw new IllegalArgumentException("Los km anuales deben estar entre 1.000 y 100.000");
         }
 
-        Car car = carService.findById(carId);
+        Car car = carService.findVisibleById(carId, email, isAdmin);
 
         // Depreciacion: simplificacion lineal a partir de la perdida a 5 anos
         // (mejora futura: curva no lineal, mas fuerte los primeros anos).

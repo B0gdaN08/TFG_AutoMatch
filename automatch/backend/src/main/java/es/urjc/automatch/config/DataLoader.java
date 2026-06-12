@@ -6,6 +6,7 @@ import es.urjc.automatch.model.CarType;
 import es.urjc.automatch.model.User;
 import es.urjc.automatch.repository.CarRepository;
 import es.urjc.automatch.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,11 +32,13 @@ import static es.urjc.automatch.model.FuelType.*;
 public class DataLoader {
 
     @Bean
-    CommandLineRunner initData(CarRepository cars, UserRepository users, PasswordEncoder encoder) {
+    CommandLineRunner initData(CarRepository cars, UserRepository users, PasswordEncoder encoder,
+            @Value("${app.seed.admin-password}") String adminPassword,
+            @Value("${app.seed.demo-password}") String demoPassword) {
         return args -> {
             if (users.count() == 0) {
-                users.save(new User("admin@automatch.es", encoder.encode("admin123"), "Admin", "ROLE_ADMIN"));
-                users.save(new User("demo@automatch.es", encoder.encode("demo123"), "Usuario Demo", "ROLE_USER"));
+                users.save(new User("admin@automatch.es", encoder.encode(adminPassword), "Admin", "ROLE_ADMIN"));
+                users.save(new User("demo@automatch.es", encoder.encode(demoPassword), "Usuario Demo", "ROLE_USER"));
             }
 
             if (cars.count() == 0) {

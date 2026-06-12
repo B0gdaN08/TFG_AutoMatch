@@ -1,6 +1,8 @@
 package es.urjc.automatch.controller;
 
-import es.urjc.automatch.model.Car;
+import es.urjc.automatch.dto.CarResponse;
+import es.urjc.automatch.security.AuthUtils;
+import es.urjc.automatch.service.CarService;
 import es.urjc.automatch.service.FavoriteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -13,14 +15,17 @@ import java.util.List;
 public class FavoriteController {
 
     private final FavoriteService favoriteService;
+    private final CarService carService;
 
-    public FavoriteController(FavoriteService favoriteService) {
+    public FavoriteController(FavoriteService favoriteService, CarService carService) {
         this.favoriteService = favoriteService;
+        this.carService = carService;
     }
 
     @GetMapping
-    public List<Car> list(Authentication authentication) {
-        return favoriteService.list(authentication.getName());
+    public List<CarResponse> list(Authentication authentication) {
+        var cars = favoriteService.list(authentication.getName());
+        return carService.toResponseList(cars, authentication.getName(), AuthUtils.isAdmin(authentication));
     }
 
     @PostMapping("/{carId}")

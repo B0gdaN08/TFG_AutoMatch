@@ -4,6 +4,7 @@ import es.urjc.automatch.dto.AuthDtos.AuthResponse;
 import es.urjc.automatch.dto.AuthDtos.LoginRequest;
 import es.urjc.automatch.dto.AuthDtos.RegisterRequest;
 import es.urjc.automatch.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
-        return authService.login(request);
+    public AuthResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        return authService.login(request, httpRequest.getRemoteAddr());
     }
 }

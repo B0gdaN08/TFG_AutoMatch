@@ -2,7 +2,9 @@ package es.urjc.automatch.controller;
 
 import es.urjc.automatch.dto.RecommendationRequest;
 import es.urjc.automatch.dto.RecommendationResult;
+import es.urjc.automatch.security.AuthUtils;
 import es.urjc.automatch.service.RecommendationService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +23,7 @@ public class RecommendationController {
     }
 
     @PostMapping
-    public List<RecommendationResult> recommend(@RequestBody RecommendationRequest request) {
-        return recommendationService.recommend(request);
+    public List<RecommendationResult> recommend(@RequestBody RecommendationRequest request, Authentication auth) {
+        return recommendationService.recommend(request, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 }

@@ -1,5 +1,7 @@
 package es.urjc.automatch.service;
 
+import es.urjc.automatch.dto.CarRequest;
+import es.urjc.automatch.dto.CarResponse;
 import es.urjc.automatch.model.Car;
 import es.urjc.automatch.model.CarStatus;
 import es.urjc.automatch.model.CarType;
@@ -36,6 +38,13 @@ public class CarService {
                 .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado"));
     }
 
+    private Long userIdOrNull(String email) {
+        if (email == null) {
+            return null;
+        }
+        return userRepository.findByEmail(email).map(User::getId).orElse(null);
+    }
+
     /**
      * Listado con filtros opcionales. Con un catalogo pequeno filtramos en memoria;
      * como mejora futura puede pasarse a JPA Specifications o consultas derivadas.
@@ -58,8 +67,26 @@ public class CarService {
                 .orElseThrow(() -> new NoSuchElementException("No existe el coche con id " + id));
     }
 
-    public List<Car> findByIds(List<Long> ids) {
-        return ids.stream().map(this::findById).toList();
+    /**
+     * Como findById, pero comprobando visibilidad: un coche que no esta APPROVED
+     * (PENDING o REJECTED) solo lo puede ver su propietario o un admin. Para
+     * cualquier otro caso se lanza la misma excepcion que si no existiera (404),
+     * de forma que no se pueda distinguir "no existe" de "no tienes acceso".
+     */
+    public Car findVisibleById(Long id, String email, boolean isAdmin) {
+        Car car = findById(id);
+        if (car.getStatus() != CarStatus.APPROVED && !isAdmin) {
+            Long userId = userIdOrNull(email);
+            boolean owner = userId != null && userId.equals(car.getOwnerId());
+            if (!owner) {
+                throw new NoSuchElementException("No existe el coche con id " + id);
+            }
+        }
+        return car;
+    }
+
+    public List<Car> findVisibleByIds(List<Long> ids, String email, boolean isAdmin) {
+        return ids.stream().map(id -> findVisibleById(id, email, isAdmin)).toList();
     }
 
     /** Anuncios publicados por el usuario, en cualquier estado. */
@@ -74,28 +101,26 @@ public class CarService {
     }
 
     /** Un usuario publica su propio coche en venta: queda pendiente de revision. */
-    public Car createListing(Car car, String email) {
+    public Car createListing(CarRequest request, String email) {
         User user = userByEmail(email);
-        car.setId(null);
+        Car car = toEntity(request);
         car.setOwnerId(user.getId());
         car.setStatus(CarStatus.PENDING);
         return carRepository.save(car);
     }
 
     /** El admin anade un coche directamente al catalogo oficial. */
-    public Car createCatalogCar(Car car) {
-        car.setId(null);
+    public Car createCatalogCar(CarRequest request) {
+        Car car = toEntity(request);
         car.setOwnerId(null);
         car.setStatus(CarStatus.APPROVED);
         return carRepository.save(car);
     }
 
-    public Car update(Long id, Car data) {
+    public Car update(Long id, CarRequest request) {
         Car car = findById(id);
-        data.setId(car.getId());
-        data.setOwnerId(car.getOwnerId());
-        data.setStatus(car.getStatus());
-        return carRepository.save(data);
+        applyRequest(car, request);
+        return carRepository.save(car);
     }
 
     public Car setStatus(Long id, CarStatus status) {
@@ -118,5 +143,43 @@ public class CarService {
         for (String url : car.getImageUrls()) {
             imageStorageService.delete(url);
         }
+    }
+
+    // --- Conversion a DTOs ---
+
+    public CarResponse toResponse(Car car, String email, boolean isAdmin) {
+        return CarResponse.from(car, userIdOrNull(email), isAdmin);
+    }
+
+    public List<CarResponse> toResponseList(List<Car> cars, String email, boolean isAdmin) {
+        Long userId = userIdOrNull(email);
+        return cars.stream().map(car -> CarResponse.from(car, userId, isAdmin)).toList();
+    }
+
+    private Car toEntity(CarRequest request) {
+        Car car = new Car();
+        applyRequest(car, request);
+        return car;
+    }
+
+    private void applyRequest(Car car, CarRequest request) {
+        car.setBrand(request.brand());
+        car.setModel(request.model());
+        car.setYear(request.year());
+        car.setPrice(request.price());
+        car.setType(request.type());
+        car.setFuel(request.fuel());
+        car.setDgtLabel(request.dgtLabel());
+        car.setConsumption(request.consumption());
+        car.setPowerCv(request.powerCv());
+        car.setTrunkLiters(request.trunkLiters());
+        car.setSeats(request.seats());
+        car.setReliability(request.reliability());
+        car.setSafety(request.safety());
+        car.setEquipment(request.equipment());
+        car.setMaintenancePerYear(request.maintenancePerYear());
+        car.setDepreciation5y(request.depreciation5y());
+        car.setDescription(request.description());
+        car.setImageUrls(request.imageUrls() == null ? List.of() : request.imageUrls());
     }
 }

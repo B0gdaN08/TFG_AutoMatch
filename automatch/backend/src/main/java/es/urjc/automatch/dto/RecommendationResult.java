@@ -1,7 +1,5 @@
 package es.urjc.automatch.dto;
 
-import es.urjc.automatch.model.Car;
-
 import java.util.Map;
 
 /**
@@ -9,7 +7,7 @@ import java.util.Map;
  * normalizado por criterio (0-1) para poder explicar el resultado.
  */
 public record RecommendationResult(
-        Car car,
+        CarResponse car,
         double score,
         Map<String, Double> criteriaScores) {
 }

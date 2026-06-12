@@ -64,7 +64,10 @@
       "Bash(rm -f lightbox-final-test.cjs final-catalog.png final-detail.png)",
       "Bash(npm uninstall *)",
       "Bash(grep -iE \"\\\\.log$\")",
-      "Bash(git restore *)"
+      "Bash(git restore *)",
+      "Bash(mvn -q compile)",
+      "Bash(java -version)",
+      "Bash(npm run *)"
     ]
   }
 }

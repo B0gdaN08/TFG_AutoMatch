@@ -9,17 +9,22 @@ import es.urjc.automatch.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LoginAttemptService loginAttemptService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
+                        LoginAttemptService loginAttemptService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.loginAttemptService = loginAttemptService;
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -34,13 +39,16 @@ public class AuthService {
         return toResponse(user);
     }
 
-    public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("Email o contrasena incorrectos"));
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+    public AuthResponse login(LoginRequest request, String ip) {
+        loginAttemptService.checkAllowed(request.email(), ip);
+
+        Optional<User> user = userRepository.findByEmail(request.email());
+        if (user.isEmpty() || !passwordEncoder.matches(request.password(), user.get().getPassword())) {
+            loginAttemptService.onFailedAttempt(request.email(), ip);
             throw new IllegalArgumentException("Email o contrasena incorrectos");
         }
-        return toResponse(user);
+        loginAttemptService.onSuccessfulLogin(request.email(), ip);
+        return toResponse(user.get());
     }
 
     private AuthResponse toResponse(User user) {
