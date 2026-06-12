@@ -1,0 +1,20 @@
+# Dependencias
+node_modules/
+
+# Build / artefactos compilados
+dist/
+**/backend/target/
+
+# Datos y ficheros subidos por el backend
+**/backend/data/
+**/backend/uploads/
+
+# Variables de entorno
+.env
+.env.*
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store

@@ -62,7 +62,9 @@
       "Bash(node lightbox-test.cjs)",
       "Bash(node lightbox-final-test.cjs)",
       "Bash(rm -f lightbox-final-test.cjs final-catalog.png final-detail.png)",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "Bash(grep -iE \"\\\\.log$\")",
+      "Bash(git restore *)"
     ]
   }
 }
