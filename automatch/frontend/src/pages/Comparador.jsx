@@ -91,7 +91,7 @@ export default function Comparador() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    request('/cars')
+    request('/cars/all')
       .then(setAllCars)
       .catch((e) => setError(e.message));
   }, []);

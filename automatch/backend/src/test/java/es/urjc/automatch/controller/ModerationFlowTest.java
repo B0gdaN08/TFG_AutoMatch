@@ -88,7 +88,9 @@ class ModerationFlowTest {
     }
 
     private boolean catalogoContiene(MvcResult result, long carId) throws Exception {
-        JsonNode array = objectMapper.readTree(result.getResponse().getContentAsString());
+        JsonNode root = objectMapper.readTree(result.getResponse().getContentAsString());
+        // GET /api/cars devuelve { content: [...] }; mine y pending devuelven array plano
+        JsonNode array = root.isArray() ? root : root.get("content");
         for (JsonNode node : array) {
             if (node.get("id").asLong() == carId) {
                 return true;
@@ -110,8 +112,8 @@ class ModerationFlowTest {
 
         long carId = objectMapper.readTree(creacion.getResponse().getContentAsString()).get("id").asLong();
 
-        // 2. No aparece en el catalogo publico
-        MvcResult catalogoAntes = mockMvc.perform(get("/api/cars"))
+        // 2. No aparece en el catalogo publico (size=50 garantiza que caben todos los coches seed)
+        MvcResult catalogoAntes = mockMvc.perform(get("/api/cars?size=50"))
                 .andExpect(status().isOk())
                 .andReturn();
         assertThat(catalogoContiene(catalogoAntes, carId)).isFalse();
@@ -145,7 +147,7 @@ class ModerationFlowTest {
                 .andExpect(jsonPath("$.status").value("APPROVED"));
 
         // 7. Ahora si aparece en el catalogo publico
-        MvcResult catalogoDespues = mockMvc.perform(get("/api/cars"))
+        MvcResult catalogoDespues = mockMvc.perform(get("/api/cars?size=50"))
                 .andExpect(status().isOk())
                 .andReturn();
         assertThat(catalogoContiene(catalogoDespues, carId)).isTrue();

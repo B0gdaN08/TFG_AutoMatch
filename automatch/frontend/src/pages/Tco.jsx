@@ -23,7 +23,7 @@ export default function Tco() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    request('/cars')
+    request('/cars/all')
       .then(setCars)
       .catch((e) => setError(e.message));
   }, []);

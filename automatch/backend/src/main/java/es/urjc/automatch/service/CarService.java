@@ -8,8 +8,12 @@ import es.urjc.automatch.model.CarType;
 import es.urjc.automatch.model.FuelType;
 import es.urjc.automatch.model.User;
 import es.urjc.automatch.repository.CarRepository;
+import es.urjc.automatch.repository.CarSpecifications;
 import es.urjc.automatch.repository.FavoriteRepository;
 import es.urjc.automatch.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,20 +51,31 @@ public class CarService {
     }
 
     /**
-     * Listado con filtros opcionales. Con un catalogo pequeno filtramos en memoria;
-     * como mejora futura puede pasarse a JPA Specifications o consultas derivadas.
-     * Solo incluye coches publicados (catalogo oficial + anuncios aprobados).
+     * Listado paginado con filtros opcionales usando JPA Specifications.
+     * Solo incluye coches publicados (catálogo oficial + anuncios aprobados).
      */
-    public List<Car> findAll(String search, CarType type, FuelType fuel, Double maxPrice) {
-        return carRepository.findAll().stream()
-                .filter(car -> car.getStatus() == CarStatus.APPROVED)
-                .filter(car -> search == null || search.isBlank()
-                        || (car.getBrand() + " " + car.getModel()).toLowerCase().contains(search.toLowerCase()))
-                .filter(car -> type == null || car.getType() == type)
-                .filter(car -> fuel == null || car.getFuel() == fuel)
-                .filter(car -> maxPrice == null || car.getPrice() <= maxPrice)
-                .sorted((a, b) -> Double.compare(a.getPrice(), b.getPrice()))
-                .toList();
+    public Page<Car> findAll(String search, CarType type, FuelType fuel,
+                              Double minPrice, Double maxPrice, String dgtLabel,
+                              Pageable pageable) {
+        Specification<Car> spec = Specification.where(CarSpecifications.estadoAprobado());
+        if (search != null && !search.isBlank())
+            spec = spec.and(CarSpecifications.textoContiene(search));
+        if (type != null)
+            spec = spec.and(CarSpecifications.tipo(type));
+        if (fuel != null)
+            spec = spec.and(CarSpecifications.combustible(fuel));
+        if (minPrice != null)
+            spec = spec.and(CarSpecifications.precioMinimo(minPrice));
+        if (maxPrice != null)
+            spec = spec.and(CarSpecifications.precioMaximo(maxPrice));
+        if (dgtLabel != null && !dgtLabel.isBlank())
+            spec = spec.and(CarSpecifications.etiquetaDgt(dgtLabel));
+        return carRepository.findAll(spec, pageable);
+    }
+
+    /** Lista completa de aprobados, sin paginación, para selects y destacados. */
+    public List<Car> findAllApproved() {
+        return carRepository.findAll(Specification.where(CarSpecifications.estadoAprobado()));
     }
 
     public Car findById(Long id) {
@@ -155,6 +170,11 @@ public class CarService {
     public List<CarResponse> toResponseList(List<Car> cars, String email, boolean isAdmin) {
         Long userId = userIdOrNull(email);
         return cars.stream().map(car -> CarResponse.from(car, userId, isAdmin)).toList();
+    }
+
+    public Page<CarResponse> toResponsePage(Page<Car> cars, String email, boolean isAdmin) {
+        Long userId = userIdOrNull(email);
+        return cars.map(car -> CarResponse.from(car, userId, isAdmin));
     }
 
     private Car toEntity(CarRequest request) {

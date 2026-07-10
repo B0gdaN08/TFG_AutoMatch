@@ -2,6 +2,7 @@ package es.urjc.automatch.controller;
 
 import es.urjc.automatch.dto.CarRequest;
 import es.urjc.automatch.dto.CarResponse;
+import es.urjc.automatch.dto.PageResponse;
 import es.urjc.automatch.model.Car;
 import es.urjc.automatch.model.CarStatus;
 import es.urjc.automatch.model.CarType;
@@ -13,16 +14,28 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cars")
 @Tag(name = "Coches", description = "Catálogo de coches y anuncios de usuarios")
 public class CarController {
+
+    private static final Map<String, Sort> SORT_MAP = Map.of(
+            "price,asc",  Sort.by("price").ascending(),
+            "price,desc", Sort.by("price").descending(),
+            "year,desc",  Sort.by("year").descending(),
+            "brand,asc",  Sort.by("brand").ascending()
+    );
 
     private final CarService carService;
 
@@ -30,15 +43,41 @@ public class CarController {
         this.carService = carService;
     }
 
-    @Operation(summary = "Listar coches", description = "Devuelve los coches visibles, con filtros opcionales de búsqueda, tipo, combustible y precio máximo")
+    @Operation(summary = "Listar coches paginado",
+               description = "Devuelve una página de coches visibles con filtros, ordenación y paginación. " +
+                             "sort admite: price,asc | price,desc | year,desc | brand,asc")
     @GetMapping
-    public List<CarResponse> list(@RequestParam(required = false) String search,
-                          @RequestParam(required = false) CarType type,
-                          @RequestParam(required = false) FuelType fuel,
-                          @RequestParam(required = false) Double maxPrice,
-                          Authentication auth) {
-        List<Car> cars = carService.findAll(search, type, fuel, maxPrice);
-        return carService.toResponseList(cars, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
+    public PageResponse<CarResponse> list(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) CarType type,
+            @RequestParam(required = false) FuelType fuel,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String dgtLabel,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false)    String sort,
+            Authentication auth) {
+
+        int clampedSize = Math.max(1, Math.min(size, 50));
+        int clampedPage = Math.max(0, page);
+        Sort springSort = sort != null ? SORT_MAP.getOrDefault(sort, Sort.by("price").ascending())
+                                       : Sort.by("price").ascending();
+        Pageable pageable = PageRequest.of(clampedPage, clampedSize, springSort);
+
+        String email = AuthUtils.emailOrNull(auth);
+        boolean isAdmin = AuthUtils.isAdmin(auth);
+        Page<Car> carPage = carService.findAll(search, type, fuel, minPrice, maxPrice, dgtLabel, pageable);
+        return PageResponse.of(carService.toResponsePage(carPage, email, isAdmin));
+    }
+
+    @Operation(summary = "Todos los coches aprobados",
+               description = "Lista completa sin paginación. Usada por selects de Comparador, TCO y Home.")
+    @GetMapping("/all")
+    public List<CarResponse> all(Authentication auth) {
+        String email = AuthUtils.emailOrNull(auth);
+        boolean isAdmin = AuthUtils.isAdmin(auth);
+        return carService.toResponseList(carService.findAllApproved(), email, isAdmin);
     }
 
     @Operation(summary = "Comparar coches", description = "Devuelve los datos de 2 o 3 coches para compararlos lado a lado")

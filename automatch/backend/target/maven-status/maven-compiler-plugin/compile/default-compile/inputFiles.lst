@@ -14,6 +14,7 @@ C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\back
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\dto\AuthDtos.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\dto\CarRequest.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\dto\CarResponse.java
+C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\dto\PageResponse.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\dto\RecommendationRequest.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\dto\RecommendationResult.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\dto\TcoResult.java
@@ -25,6 +26,7 @@ C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\back
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\model\FuelType.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\model\User.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\repository\CarRepository.java
+C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\repository\CarSpecifications.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\repository\FavoriteRepository.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\repository\UserRepository.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\security\AuthUtils.java

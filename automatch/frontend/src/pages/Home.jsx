@@ -84,7 +84,7 @@ export default function Home() {
   const [cars, setCars] = useState(null); // null = cargando
 
   useEffect(() => {
-    request('/cars')
+    request('/cars/all')
       .then(setCars)
       .catch(() => setCars([]));
   }, []);
