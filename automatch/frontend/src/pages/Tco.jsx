@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { request, formatEuro } from '../api';
+import CopyLinkButton from '../components/CopyLinkButton';
 import { ReceiptIcon } from '../components/icons';
 
 const CATEGORY_LABELS = {
@@ -11,16 +12,32 @@ const CATEGORY_LABELS = {
   impuestos: 'Impuestos',
 };
 
+/** Número desde un query param, acotado al rango del slider; fallback si falta o no es válido. */
+function numParam(value, min, max, fallback) {
+  const n = Number(value);
+  if (!value || Number.isNaN(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
 export default function Tco() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [cars, setCars] = useState([]);
   const [carId, setCarId] = useState(searchParams.get('car') || '');
-  const [years, setYears] = useState(5);
-  const [km, setKm] = useState(15000);
+  const [years, setYears] = useState(() => numParam(searchParams.get('years'), 1, 10, 5));
+  const [km, setKm] = useState(() => numParam(searchParams.get('km'), 5000, 40000, 15000));
 
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+
+  // URL compartible: coche, años y km viajan como query params
+  useEffect(() => {
+    if (!carId) {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+    setSearchParams({ car: carId, years: String(years), km: String(km) }, { replace: true });
+  }, [carId, years, km, setSearchParams]);
 
   useEffect(() => {
     request('/cars/all')
@@ -107,10 +124,15 @@ export default function Tco() {
 
       {result && (
         <div className="card tco-result">
-          <h2>{result.carName}</h2>
-          <p className="muted">
-            {result.years} años · {result.kmPerYear.toLocaleString('es-ES')} km/año
-          </p>
+          <div className="results-bar">
+            <div>
+              <h2>{result.carName}</h2>
+              <p className="muted">
+                {result.years} años · {result.kmPerYear.toLocaleString('es-ES')} km/año
+              </p>
+            </div>
+            <CopyLinkButton />
+          </div>
 
           <div className="tco-bars">
             {categories.map(([key, value], index) => (

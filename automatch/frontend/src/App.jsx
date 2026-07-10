@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import Registro from './pages/Registro';
 import VenderCoche from './pages/VenderCoche';
 import MisAnuncios from './pages/MisAnuncios';
+import EditarAnuncio from './pages/EditarAnuncio';
 import AdminPanel from './pages/AdminPanel';
 import AdminCoches from './pages/AdminCoches';
 import AdminModeracion from './pages/AdminModeracion';
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/registro" element={<Registro />} />
           <Route path="/vender" element={<VenderCoche />} />
           <Route path="/mis-anuncios" element={<MisAnuncios />} />
+          <Route path="/mis-anuncios/:id/editar" element={<EditarAnuncio />} />
           <Route path="/admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
           <Route path="/admin/coches" element={<RequireAdmin><AdminCoches /></RequireAdmin>} />
           <Route path="/admin/moderacion" element={<RequireAdmin><AdminModeracion /></RequireAdmin>} />

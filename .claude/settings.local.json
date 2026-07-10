@@ -90,7 +90,11 @@
       "Bash(sed -n '48,53p' src/api.test.js)",
       "Bash(npm test *)",
       "Bash(docker --version)",
-      "Bash(APP_JWT_SECRET=clave-de-prueba-solo-para-validar-config-1234567890 docker compose config --quiet)"
+      "Bash(APP_JWT_SECRET=clave-de-prueba-solo-para-validar-config-1234567890 docker compose config --quiet)",
+      "Bash(curl -s -o /dev/null -w \"GET /api/cars/1/contact sin auth -> HTTP %{http_code}\\\\n\" \"http://localhost:8080/api/cars/1/contact\")",
+      "Bash(curl -s -X POST http://localhost:8080/api/recommendations -H 'Content-Type: application/json' -d '{\"maxPrice\":30000,\"types\":[],\"fuels\":[],\"minSeats\":null,\"weights\":{\"price\":5,\"efficiency\":5,\"reliability\":2,\"safety\":1,\"space\":1,\"performance\":1,\"equipment\":1},\"method\":\"TOPSIS\"}')",
+      "Bash(curl -s -o /dev/null -w \"Frontend /recomendador -> HTTP %{http_code}\\\\n\" \"http://localhost:5173/recomendador?w=5,5,2,1,1,1,1&method=TOPSIS&maxPrice=30000\")",
+      "Bash(curl -s -o /dev/null -w \"Frontend /tco -> HTTP %{http_code}\\\\n\" \"http://localhost:5173/tco?car=17&years=8&km=25000\")"
     ]
   }
 }

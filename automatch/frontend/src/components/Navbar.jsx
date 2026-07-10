@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { useCompareIds } from '../compare';
 
 export default function Navbar() {
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const compareIds = useCompareIds();
 
   useEffect(() => {
     function onScroll() {
@@ -35,7 +37,10 @@ export default function Navbar() {
         <NavLink to="/" end>Inicio</NavLink>
         <NavLink to="/catalogo">Catálogo</NavLink>
         <NavLink to="/recomendador">Recomendador</NavLink>
-        <NavLink to="/comparador">Comparador</NavLink>
+        <NavLink to={compareIds.length ? `/comparador?ids=${compareIds.join(',')}` : '/comparador'}>
+          Comparador
+          {compareIds.length > 0 && <span className="nav-badge">{compareIds.length}</span>}
+        </NavLink>
         <NavLink to="/tco">Coste real</NavLink>
         <NavLink to="/favoritos">Favoritos</NavLink>
         {user && <NavLink to="/vender">Vender coche</NavLink>}

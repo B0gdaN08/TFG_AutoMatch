@@ -1,12 +1,29 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FUEL_LABELS, TYPE_LABELS, STATUS_LABELS, formatEuro, imageUrl } from '../api';
+import { addToCompare, removeFromCompare, useCompareIds, MAX_COMPARE } from '../compare';
 import Plate from './Plate';
 import Lightbox from './Lightbox';
 
-export default function CarCard({ car, onRemove, removeLabel = 'Quitar' }) {
+export default function CarCard({ car, onRemove, removeLabel = 'Quitar', onEdit }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [compareWarn, setCompareWarn] = useState(false);
+  const warnTimer = useRef(null);
+  const compareIds = useCompareIds();
+  const inCompare = compareIds.includes(car.id);
   const hasImages = car.imageUrls?.length > 0;
+
+  function toggleCompare() {
+    if (inCompare) {
+      removeFromCompare(car.id);
+      return;
+    }
+    if (!addToCompare(car.id)) {
+      setCompareWarn(true);
+      clearTimeout(warnTimer.current);
+      warnTimer.current = setTimeout(() => setCompareWarn(false), 3000);
+    }
+  }
 
   return (
     <article className="card car-card">
@@ -53,16 +70,31 @@ export default function CarCard({ car, onRemove, removeLabel = 'Quitar' }) {
       <div className="car-card-footer">
         <strong className="price">{formatEuro(car.price)}</strong>
         <div className="car-card-actions">
+          {onEdit && (
+            <button className="btn btn-ghost btn-sm" onClick={() => onEdit(car)}>
+              Editar
+            </button>
+          )}
           {onRemove && (
             <button className="btn btn-ghost btn-sm" onClick={() => onRemove(car)}>
               {removeLabel}
             </button>
           )}
+          <button
+            className={`btn btn-sm ${inCompare ? 'btn-compare-active' : 'btn-ghost'}`}
+            onClick={toggleCompare}
+            title={inCompare ? 'Quitar del comparador' : 'Añadir al comparador'}
+          >
+            {inCompare ? '✓ Comparando' : 'Comparar'}
+          </button>
           <Link className="btn btn-primary btn-sm" to={`/coches/${car.id}`}>
             Ver ficha
           </Link>
         </div>
       </div>
+      {compareWarn && (
+        <p className="compare-warn">El comparador admite {MAX_COMPARE} coches como máximo.</p>
+      )}
     </article>
   );
 }

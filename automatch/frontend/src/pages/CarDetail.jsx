@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { request, FUEL_LABELS, TYPE_LABELS, formatEuro, imageUrl } from '../api';
 import { useAuth } from '../AuthContext';
+import { addToCompare, removeFromCompare, useCompareIds, MAX_COMPARE } from '../compare';
 import Plate from '../components/Plate';
 import ScoreBar from '../components/ScoreBar';
 import Lightbox from '../components/Lightbox';
@@ -17,6 +18,10 @@ export default function CarDetail() {
   const [error, setError] = useState('');
   const [activeImage, setActiveImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [compareWarn, setCompareWarn] = useState(false);
+  const warnTimer = useRef(null);
+  const compareIds = useCompareIds();
+  const inCompare = car ? compareIds.includes(car.id) : false;
 
   useEffect(() => {
     setActiveImage(0);
@@ -38,6 +43,28 @@ export default function CarDetail() {
         await request(`/favorites/${id}`, { method: 'POST' });
         setIsFav(true);
       }
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  function toggleCompare() {
+    if (inCompare) {
+      removeFromCompare(car.id);
+      return;
+    }
+    if (!addToCompare(car.id)) {
+      setCompareWarn(true);
+      clearTimeout(warnTimer.current);
+      warnTimer.current = setTimeout(() => setCompareWarn(false), 3000);
+    }
+  }
+
+  async function contactSeller() {
+    try {
+      const contact = await request(`/cars/${id}/contact`);
+      const subject = encodeURIComponent(`Interesado en tu ${car.brand} ${car.model} en AutoMatch`);
+      window.location.href = `mailto:${contact.email}?subject=${subject}`;
     } catch (e) {
       setError(e.message);
     }
@@ -179,10 +206,22 @@ export default function CarDetail() {
         <Link className="btn btn-primary" to={`/tco?car=${car.id}`}>
           Calcular su coste con tus km
         </Link>
-        <Link className="btn btn-ghost" to={`/comparador?ids=${car.id}`}>
-          Comparar con otros
-        </Link>
+        <button
+          type="button"
+          className={`btn ${inCompare ? 'btn-compare-active' : 'btn-ghost'}`}
+          onClick={toggleCompare}
+        >
+          {inCompare ? '✓ En el comparador' : 'Añadir al comparador'}
+        </button>
+        {user && car.userListing && !car.own && (
+          <button type="button" className="btn btn-ghost" onClick={contactSeller}>
+            ✉ Contactar con el vendedor
+          </button>
+        )}
       </div>
+      {compareWarn && (
+        <p className="compare-warn">El comparador admite {MAX_COMPARE} coches como máximo.</p>
+      )}
     </section>
   );
 }

@@ -10,6 +10,8 @@ import java.util.List;
 /**
  * Vista publica de un coche: no incluye el ownerId (no debe revelarse).
  * "own" indica si el coche pertenece al usuario autenticado de la peticion.
+ * "userListing" indica si es un anuncio de usuario (tiene vendedor contactable),
+ * sin revelar su identidad: el contacto se pide aparte en GET /api/cars/{id}/contact.
  * "status" solo se rellena cuando quien consulta es el dueño o un admin;
  * para el resto llega como null (los anuncios visibles para cualquiera estan APPROVED).
  */
@@ -34,6 +36,7 @@ public record CarResponse(
         String description,
         List<String> imageUrls,
         boolean own,
+        boolean userListing,
         CarStatus status) {
 
     public static CarResponse from(Car car, Long currentUserId, boolean isAdmin) {
@@ -44,6 +47,6 @@ public record CarResponse(
                 car.getType(), car.getFuel(), car.getDgtLabel(), car.getConsumption(), car.getPowerCv(),
                 car.getTrunkLiters(), car.getSeats(), car.getReliability(), car.getSafety(), car.getEquipment(),
                 car.getMaintenancePerYear(), car.getDepreciation5y(), car.getDescription(), car.getImageUrls(),
-                own, status);
+                own, car.getOwnerId() != null, status);
     }
 }

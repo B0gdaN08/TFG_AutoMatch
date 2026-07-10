@@ -8,6 +8,8 @@ import es.urjc.automatch.model.User;
 import es.urjc.automatch.repository.CarRepository;
 import es.urjc.automatch.repository.FavoriteRepository;
 import es.urjc.automatch.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,8 @@ import java.util.Set;
 
 @Service
 public class AdminService {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminService.class);
 
     private static final Set<String> VALID_ROLES = Set.of("ROLE_USER", "ROLE_ADMIN");
 
@@ -58,6 +62,7 @@ public class AdminService {
         }
         target.setRole(role);
         userRepository.save(target);
+        log.info("Auditoria: {} cambia el rol de {} (id={}) a {}", currentEmail, target.getEmail(), id, role);
         return new UserSummary(target.getId(), target.getEmail(), target.getName(), target.getRole());
     }
 
@@ -74,6 +79,7 @@ public class AdminService {
             carRepository.delete(car);
         }
         userRepository.delete(target);
+        log.info("Auditoria: {} elimina al usuario {} (id={})", currentEmail, target.getEmail(), id);
     }
 
     public StatsResponse stats() {

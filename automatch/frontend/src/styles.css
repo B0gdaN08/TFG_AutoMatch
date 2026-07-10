@@ -2315,3 +2315,65 @@ fieldset.field legend {
     transition: none !important;
   }
 }
+
+/* ==========================================================================
+   Comparador: selección persistente y badge de la navbar
+   ========================================================================== */
+
+.nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--amber);
+  color: var(--asphalt);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: 1px;
+}
+
+.btn-compare-active {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  border: 1px solid var(--accent);
+}
+
+.btn-compare-active:hover {
+  background: rgba(31, 79, 216, 0.16);
+}
+
+.compare-warn {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #a33c00;
+  background: rgba(255, 176, 32, 0.14);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+
+/* ==========================================================================
+   Paginación del catálogo
+   ========================================================================== */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 26px 0 8px;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.pagination button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

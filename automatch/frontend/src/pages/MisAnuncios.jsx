@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { request } from '../api';
 import { useAuth } from '../AuthContext';
 import CarCard from '../components/CarCard';
@@ -9,6 +9,7 @@ import { ListIcon } from '../components/icons';
 export default function MisAnuncios() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -59,6 +60,11 @@ export default function MisAnuncios() {
           Tu anuncio se ha publicado y está pendiente de revisión por un administrador.
         </p>
       )}
+      {location.state?.justEdited && (
+        <p className="alert alert-info">
+          Cambios guardados. Tu anuncio ha vuelto a quedar pendiente de revisión.
+        </p>
+      )}
       {error && <p className="alert">{error}</p>}
       {loading && <p className="muted">Cargando tus anuncios…</p>}
       {!loading && cars.length === 0 && (
@@ -72,7 +78,13 @@ export default function MisAnuncios() {
       )}
       <div className="grid">
         {cars.map((car) => (
-          <CarCard key={car.id} car={car} onRemove={setPendingRemove} removeLabel="Borrar anuncio" />
+          <CarCard
+            key={car.id}
+            car={car}
+            onRemove={setPendingRemove}
+            removeLabel="Borrar anuncio"
+            onEdit={(c) => navigate(`/mis-anuncios/${c.id}/editar`)}
+          />
         ))}
       </div>
       <ConfirmDialog

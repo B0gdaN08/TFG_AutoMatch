@@ -3,6 +3,7 @@ package es.urjc.automatch.controller;
 import es.urjc.automatch.dto.CarRequest;
 import es.urjc.automatch.dto.CarResponse;
 import es.urjc.automatch.dto.PageResponse;
+import es.urjc.automatch.dto.SellerContact;
 import es.urjc.automatch.model.Car;
 import es.urjc.automatch.model.CarStatus;
 import es.urjc.automatch.model.CarType;
@@ -148,19 +149,33 @@ public class CarController {
         return carService.toResponse(car, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 
-    @Operation(summary = "Actualizar un coche", description = "Modifica los datos de un coche existente (solo administradores)")
-    @ApiResponse(responseCode = "404", description = "El coche no existe")
+    /** El admin edita cualquier coche; el dueño solo sus anuncios (y vuelven a revision). */
+    @Operation(summary = "Actualizar un coche",
+               description = "El administrador edita cualquier coche sin cambiar su estado. " +
+                             "El propietario edita sus anuncios: si estaban aprobados o rechazados, vuelven a PENDING")
+    @ApiResponses({
+            @ApiResponse(responseCode = "403", description = "No eres el propietario ni administrador"),
+            @ApiResponse(responseCode = "404", description = "El coche no existe")
+    })
     @PutMapping("/{id}")
     public CarResponse update(@PathVariable Long id, @Valid @RequestBody CarRequest request, Authentication auth) {
-        var car = carService.update(id, request);
-        return carService.toResponse(car, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
+        var car = carService.update(id, request, auth.getName(), AuthUtils.isAdmin(auth));
+        return carService.toResponse(car, auth.getName(), AuthUtils.isAdmin(auth));
+    }
+
+    @Operation(summary = "Contacto del vendedor",
+               description = "Nombre y email del vendedor de un anuncio aprobado (solo usuarios autenticados)")
+    @ApiResponse(responseCode = "404", description = "El coche no existe, no es un anuncio de usuario o no está aprobado")
+    @GetMapping("/{id}/contact")
+    public SellerContact contact(@PathVariable Long id) {
+        return carService.contactInfo(id);
     }
 
     @Operation(summary = "Aprobar anuncio", description = "Aprueba un anuncio pendiente de un usuario (solo administradores)")
     @ApiResponse(responseCode = "404", description = "El coche no existe")
     @PutMapping("/{id}/approve")
     public CarResponse approve(@PathVariable Long id, Authentication auth) {
-        var car = carService.setStatus(id, CarStatus.APPROVED);
+        var car = carService.setStatus(id, CarStatus.APPROVED, auth.getName());
         return carService.toResponse(car, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 
@@ -168,7 +183,7 @@ public class CarController {
     @ApiResponse(responseCode = "404", description = "El coche no existe")
     @PutMapping("/{id}/reject")
     public CarResponse reject(@PathVariable Long id, Authentication auth) {
-        var car = carService.setStatus(id, CarStatus.REJECTED);
+        var car = carService.setStatus(id, CarStatus.REJECTED, auth.getName());
         return carService.toResponse(car, AuthUtils.emailOrNull(auth), AuthUtils.isAdmin(auth));
     }
 

@@ -63,6 +63,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/cars/mine").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/cars/pending").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/cars/*/contact").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/cars/**").permitAll()
                 .requestMatchers("/api/tco/**").permitAll()
                 .requestMatchers("/api/recommendations").permitAll()
@@ -70,7 +71,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/cars/catalog").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/cars").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/cars/*/approve", "/api/cars/*/reject").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/cars/**").hasRole("ADMIN")
+                // La edicion permite dueño o admin: la comprobacion fina vive en CarService.update
+                .requestMatchers(HttpMethod.PUT, "/api/cars/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/cars/**").authenticated()
                 .requestMatchers("/api/favorites/**").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")

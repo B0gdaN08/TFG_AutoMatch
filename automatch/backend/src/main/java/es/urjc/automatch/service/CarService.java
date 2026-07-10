@@ -2,6 +2,7 @@ package es.urjc.automatch.service;
 
 import es.urjc.automatch.dto.CarRequest;
 import es.urjc.automatch.dto.CarResponse;
+import es.urjc.automatch.dto.SellerContact;
 import es.urjc.automatch.model.Car;
 import es.urjc.automatch.model.CarStatus;
 import es.urjc.automatch.model.CarType;
@@ -11,6 +12,8 @@ import es.urjc.automatch.repository.CarRepository;
 import es.urjc.automatch.repository.CarSpecifications;
 import es.urjc.automatch.repository.FavoriteRepository;
 import es.urjc.automatch.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +27,8 @@ import java.util.NoSuchElementException;
 
 @Service
 public class CarService {
+
+    private static final Logger log = LoggerFactory.getLogger(CarService.class);
 
     private final CarRepository carRepository;
     private final UserRepository userRepository;
@@ -133,16 +138,48 @@ public class CarService {
         return carRepository.save(car);
     }
 
-    public Car update(Long id, CarRequest request) {
+    /**
+     * Edita un coche. El admin puede editar cualquiera sin efectos secundarios;
+     * el dueño solo puede editar sus propios anuncios y, si el anuncio ya estaba
+     * moderado (APPROVED o REJECTED), vuelve a PENDING para re-moderacion.
+     */
+    public Car update(Long id, CarRequest request, String email, boolean isAdmin) {
         Car car = findById(id);
+        if (!isAdmin) {
+            User user = userByEmail(email);
+            if (car.getOwnerId() == null || !car.getOwnerId().equals(user.getId())) {
+                throw new AccessDeniedException("No puedes editar este coche");
+            }
+            if (car.getStatus() != CarStatus.PENDING) {
+                car.setStatus(CarStatus.PENDING);
+                log.info("Auditoria: {} edita su anuncio {} ({} {}) y vuelve a moderacion (PENDING)",
+                        email, id, car.getBrand(), car.getModel());
+            }
+        }
         applyRequest(car, request);
         return carRepository.save(car);
     }
 
-    public Car setStatus(Long id, CarStatus status) {
+    public Car setStatus(Long id, CarStatus status, String actorEmail) {
         Car car = findById(id);
         car.setStatus(status);
+        log.info("Auditoria: {} cambia el estado del coche {} ({} {}) a {}",
+                actorEmail, id, car.getBrand(), car.getModel(), status);
         return carRepository.save(car);
+    }
+
+    /**
+     * Contacto del vendedor: solo para anuncios de usuarios (ownerId != null)
+     * que esten APPROVED. Para el resto, 404 indistinguible de "no existe".
+     */
+    public SellerContact contactInfo(Long id) {
+        Car car = findById(id);
+        if (car.getOwnerId() == null || car.getStatus() != CarStatus.APPROVED) {
+            throw new NoSuchElementException("Este coche no tiene información de contacto disponible");
+        }
+        User owner = userRepository.findById(car.getOwnerId())
+                .orElseThrow(() -> new NoSuchElementException("Este coche no tiene información de contacto disponible"));
+        return new SellerContact(owner.getName(), owner.getEmail());
     }
 
     @Transactional
@@ -156,6 +193,7 @@ public class CarService {
         }
         favoriteRepository.deleteByCarId(id);
         carRepository.delete(car);
+        log.info("Auditoria: {} elimina el coche {} ({} {})", email, id, car.getBrand(), car.getModel());
         for (String url : car.getImageUrls()) {
             imageStorageService.delete(url);
         }

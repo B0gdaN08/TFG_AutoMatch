@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { request, FUEL_LABELS, formatEuro } from '../api';
+import { readCompareIds } from '../compare';
 import Plate from '../components/Plate';
 import CustomVehicleForm, { EMPTY_CUSTOM_VEHICLE, TYPE_OPTIONS } from '../components/CustomVehicleForm';
 import { CompareIcon } from '../components/icons';
@@ -80,7 +81,8 @@ const ROWS = [
 
 export default function Comparador() {
   const [searchParams] = useSearchParams();
-  const initialIds = (searchParams.get('ids') || '')
+  // Sin parámetro ids en la URL, se precarga la selección hecha con los botones "Comparar"
+  const initialIds = (searchParams.get('ids') || readCompareIds().join(','))
     .split(',')
     .filter(Boolean)
     .slice(0, 3);
