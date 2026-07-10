@@ -94,7 +94,18 @@
       "Bash(curl -s -o /dev/null -w \"GET /api/cars/1/contact sin auth -> HTTP %{http_code}\\\\n\" \"http://localhost:8080/api/cars/1/contact\")",
       "Bash(curl -s -X POST http://localhost:8080/api/recommendations -H 'Content-Type: application/json' -d '{\"maxPrice\":30000,\"types\":[],\"fuels\":[],\"minSeats\":null,\"weights\":{\"price\":5,\"efficiency\":5,\"reliability\":2,\"safety\":1,\"space\":1,\"performance\":1,\"equipment\":1},\"method\":\"TOPSIS\"}')",
       "Bash(curl -s -o /dev/null -w \"Frontend /recomendador -> HTTP %{http_code}\\\\n\" \"http://localhost:5173/recomendador?w=5,5,2,1,1,1,1&method=TOPSIS&maxPrice=30000\")",
-      "Bash(curl -s -o /dev/null -w \"Frontend /tco -> HTTP %{http_code}\\\\n\" \"http://localhost:5173/tco?car=17&years=8&km=25000\")"
+      "Bash(curl -s -o /dev/null -w \"Frontend /tco -> HTTP %{http_code}\\\\n\" \"http://localhost:5173/tco?car=17&years=8&km=25000\")",
+      "Bash(curl -s -o /dev/null -w \"backend: %{http_code}\\\\n\" \"http://localhost:8080/api/cars?size=1\")",
+      "Read(//c/Program Files \\(x86\\)/Microsoft/Edge/Application/**)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Bash(mkdir -p 'C:\\\\Users\\\\Usuario/AppData/Local/Temp/claude/c--Users-Usuario-Desktop-TFG-Informatica-Bueno-automatch-rediseno/4a37d8f4-2d95-4ffe-b6c3-c550ae0fb00c/scratchpad/probe')",
+      "Bash(npm init *)",
+      "Bash(npm i *)",
+      "Bash(node overflow.js)",
+      "Bash(sed -i \"s|C:.*msedge.exe|C:/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe|\" mobileshot.js)",
+      "Bash(node mobileshot.js)",
+      "Bash(grep -n '\\\\.filters input\\\\|\\\\.filters select\\\\|^input,\\\\|^select,\\\\|^select {' -A 10 /c/Users/Usuario/Desktop/TFG_Informatica_Bueno/automatch-rediseno/automatch/frontend/src/styles.css)",
+      "Bash(python -)"
     ]
   }
 }

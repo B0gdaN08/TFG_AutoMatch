@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { request, FUEL_LABELS, TYPE_LABELS, formatEuro } from '../api';
+import { addToCompare, removeFromCompare, useCompareIds, MAX_COMPARE } from '../compare';
 import Plate from '../components/Plate';
 import ScoreBar from '../components/ScoreBar';
 import CopyLinkButton from '../components/CopyLinkButton';
@@ -37,6 +38,24 @@ function weightsFromParam(param) {
   return weights;
 }
 
+/**
+ * Explica en una frase por qué un coche ha quedado arriba: los dos criterios
+ * que más aportan a su puntuación (peso del usuario × valor normalizado).
+ */
+function whyText(result, usedWeights) {
+  if (!usedWeights) return null;
+  const top = CRITERIA
+    .map((criterion) => ({
+      label: criterion.label,
+      contribution: (usedWeights[criterion.key] || 0) * (result.criteriaScores[criterion.key] || 0),
+    }))
+    .filter((c) => c.contribution > 0)
+    .sort((a, b) => b.contribution - a.contribution)
+    .slice(0, 2);
+  if (top.length === 0) return null;
+  return `Destaca en ${top.map((t) => t.label.toLowerCase()).join(' y ')}`;
+}
+
 export default function Recomendador() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -55,9 +74,25 @@ export default function Recomendador() {
   );
 
   const [usedMethod, setUsedMethod] = useState(null);
+  const [usedWeights, setUsedWeights] = useState(null);
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [compareWarn, setCompareWarn] = useState(false);
+  const warnTimer = useRef(null);
+  const compareIds = useCompareIds();
+
+  function toggleCompare(carId) {
+    if (compareIds.includes(carId)) {
+      removeFromCompare(carId);
+      return;
+    }
+    if (!addToCompare(carId)) {
+      setCompareWarn(true);
+      clearTimeout(warnTimer.current);
+      warnTimer.current = setTimeout(() => setCompareWarn(false), 3000);
+    }
+  }
 
   function setWeight(key, value) {
     setWeights((prev) => ({ ...prev, [key]: Number(value) }));
@@ -76,6 +111,7 @@ export default function Recomendador() {
       const data = await request('/recommendations', { method: 'POST', body });
       setResults(data);
       setUsedMethod(body.method);
+      setUsedWeights(body.weights);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -241,6 +277,10 @@ export default function Recomendador() {
             </div>
           )}
 
+          {compareWarn && (
+            <p className="compare-warn">El comparador admite {MAX_COMPARE} coches como máximo.</p>
+          )}
+
           {results && results.map((result, index) => (
             <article key={result.car.id} className="card reco-card">
               <div className="reco-rank">{index + 1}</div>
@@ -262,6 +302,10 @@ export default function Recomendador() {
 
                 <ScoreBar value={result.score} max={100} tone="amber" label={`Puntuación ${result.score} de 100`} />
 
+                {whyText(result, usedWeights) && (
+                  <p className="reco-why">{whyText(result, usedWeights)}</p>
+                )}
+
                 <div className="criteria-grid">
                   {CRITERIA.map((criterion) => (
                     <div
@@ -280,9 +324,18 @@ export default function Recomendador() {
                   ))}
                 </div>
 
-                <Link className="btn btn-ghost btn-sm" to={`/coches/${result.car.id}`}>
-                  Ver ficha completa
-                </Link>
+                <div className="reco-actions">
+                  <Link className="btn btn-ghost btn-sm" to={`/coches/${result.car.id}`}>
+                    Ver ficha completa
+                  </Link>
+                  <button
+                    type="button"
+                    className={`btn btn-sm ${compareIds.includes(result.car.id) ? 'btn-compare-active' : 'btn-ghost'}`}
+                    onClick={() => toggleCompare(result.car.id)}
+                  >
+                    {compareIds.includes(result.car.id) ? '✓ Comparando' : 'Comparar'}
+                  </button>
+                </div>
               </div>
             </article>
           ))}

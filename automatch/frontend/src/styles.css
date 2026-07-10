@@ -756,10 +756,18 @@ main section > .lead {
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
   gap: 12px;
   margin-bottom: 22px;
   animation: fade-up 0.45s var(--ease) 0.1s backwards;
+}
+
+/* Hueco para la flecha nativa del select: que no pise el texto de la opción */
+.filters select {
+  padding-right: 28px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .results-bar {
@@ -2376,4 +2384,45 @@ fieldset.field legend {
 .pagination button:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+/* ==========================================================================
+   Recomendador: explicación y acciones del resultado
+   ========================================================================== */
+
+.reco-why {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  display: inline-block;
+}
+
+.reco-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* ==========================================================================
+   Página 404
+   ========================================================================== */
+
+.notfound {
+  text-align: center;
+  padding: 60px 18px;
+}
+
+.notfound .plate {
+  margin: 0 auto 18px;
+  transform: scale(1.6);
+}
+
+.notfound h1 {
+  font-family: var(--font-display);
+  font-size: 42px;
+  margin: 18px 0 8px;
 }

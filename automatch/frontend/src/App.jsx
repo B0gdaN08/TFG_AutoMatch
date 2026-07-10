@@ -1,4 +1,5 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import RequireAdmin from './components/RequireAdmin';
 import ScrollTopButton from './components/ScrollTopButton';
@@ -18,10 +19,36 @@ import AdminPanel from './pages/AdminPanel';
 import AdminCoches from './pages/AdminCoches';
 import AdminModeracion from './pages/AdminModeracion';
 import AdminUsuarios from './pages/AdminUsuarios';
+import NotFound from './pages/NotFound';
+
+/** Título de la pestaña según la ruta (el orden importa: gana el primer prefijo). */
+const TITLES = [
+  ['/catalogo', 'Catálogo'],
+  ['/coches/', 'Ficha del coche'],
+  ['/comparador', 'Comparador'],
+  ['/recomendador', 'Recomendador'],
+  ['/tco', 'Coste real'],
+  ['/favoritos', 'Favoritos'],
+  ['/login', 'Entrar'],
+  ['/registro', 'Crear cuenta'],
+  ['/vender', 'Vender coche'],
+  ['/mis-anuncios', 'Mis anuncios'],
+  ['/admin', 'Administración'],
+];
+
+function PageTitle() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const hit = TITLES.find(([prefix]) => pathname.startsWith(prefix));
+    document.title = hit ? `${hit[1]} · AutoMatch` : 'AutoMatch · ¿Qué coche te compras?';
+  }, [pathname]);
+  return null;
+}
 
 export default function App() {
   return (
     <>
+      <PageTitle />
       <Navbar />
       <main className="container">
         <Routes>
@@ -41,6 +68,7 @@ export default function App() {
           <Route path="/admin/coches" element={<RequireAdmin><AdminCoches /></RequireAdmin>} />
           <Route path="/admin/moderacion" element={<RequireAdmin><AdminModeracion /></RequireAdmin>} />
           <Route path="/admin/usuarios" element={<RequireAdmin><AdminUsuarios /></RequireAdmin>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <footer className="footer">
