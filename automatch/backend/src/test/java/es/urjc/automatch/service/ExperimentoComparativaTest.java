@@ -2,7 +2,13 @@ package es.urjc.automatch.service;
 
 import es.urjc.automatch.dto.RecommendationRequest;
 import es.urjc.automatch.dto.RecommendationResult;
+import es.urjc.automatch.model.Car;
+import es.urjc.automatch.model.CarStatus;
 import es.urjc.automatch.model.FuelType;
+import es.urjc.automatch.repository.CarRepository;
+import es.urjc.automatch.service.ranking.RankingAlgorithm;
+import es.urjc.automatch.service.ranking.TopsisAlgorithm;
+import es.urjc.automatch.service.ranking.WeightedSumAlgorithm;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +40,12 @@ class ExperimentoComparativaTest {
 
     @Autowired
     private RecommendationService svc;
+
+    @Autowired
+    private CarService carService;
+
+    @Autowired
+    private CarRepository carRepository;
 
     // -------------------------------------------------------------------------
     // Definición de perfiles
@@ -123,6 +135,9 @@ class ExperimentoComparativaTest {
         }
         md.append("\n");
 
+        // ---- Analisis de rank reversal ----
+        md.append(seccionRankReversal());
+
         // ---- Guardar archivo y volcar a consola ----
         String contenido = md.toString();
         Path out = Path.of("docs/experimento-recomendador.md");
@@ -131,6 +146,86 @@ class ExperimentoComparativaTest {
 
         System.out.println("\n=== EXPERIMENTO COMPARATIVO WSM vs TOPSIS ===\n");
         System.out.println(contenido);
+    }
+
+    // -------------------------------------------------------------------------
+    // Rank reversal
+    // -------------------------------------------------------------------------
+
+    /**
+     * Analisis de rank reversal: la critica clasica a TOPSIS (Belton y Gear, 1983)
+     * es que eliminar (o añadir) una alternativa puede invertir el orden relativo
+     * de las demas, porque tanto la normalizacion vectorial como las soluciones
+     * ideales A+/A- dependen del conjunto completo de candidatos.
+     *
+     * Protocolo: con el perfil Equilibrado y el catalogo completo se calcula el
+     * ranking base de cada metodo; despues se elimina (a) el 2º clasificado y
+     * (b) el ultimo clasificado, se recalcula, y se cuentan los pares de coches
+     * cuyo orden relativo se invierte respecto al ranking base.
+     */
+    private String seccionRankReversal() {
+        List<Car> candidatos = carRepository.findByStatus(CarStatus.APPROVED);
+        Map<String, Double> pesosEquilibrado = pesos(3, 3, 3, 3, 3, 3, 3);
+
+        Map<String, RankingAlgorithm> metodos = new LinkedHashMap<>();
+        metodos.put("WSM — Suma Ponderada", new WeightedSumAlgorithm(carService));
+        metodos.put("TOPSIS", new TopsisAlgorithm(carService));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("## 3. Análisis de rank reversal — perfil Equilibrado\n\n");
+        sb.append("Se elimina una alternativa del conjunto y se recalcula el ranking. ");
+        sb.append("Se cuentan los pares de coches cuyo orden relativo se invierte respecto ");
+        sb.append("al ranking base (crítica de Belton y Gear, 1983, a TOPSIS: la normalización ");
+        sb.append("vectorial y las soluciones ideales dependen del conjunto de alternativas; ");
+        sb.append("en WSM la normalización min-max solo cambia si el coche eliminado era un ");
+        sb.append("extremo de algún criterio).\n\n");
+        sb.append("| Método | Alternativa eliminada | Pares invertidos |\n");
+        sb.append("|--------|----------------------|:----------------:|\n");
+
+        for (Map.Entry<String, RankingAlgorithm> entry : metodos.entrySet()) {
+            RankingAlgorithm algoritmo = entry.getValue();
+            List<Long> base = idsOf2(algoritmo.rank(candidatos, pesosEquilibrado, null, false));
+
+            // Escenarios: eliminar el 2º clasificado y el ultimo clasificado del ranking base
+            for (int posEliminada : new int[]{1, base.size() - 1}) {
+                Long idEliminado = base.get(posEliminada);
+                Car eliminado = candidatos.stream()
+                        .filter(c -> c.getId().equals(idEliminado)).findFirst().orElseThrow();
+                List<Car> reducido = candidatos.stream()
+                        .filter(c -> !c.getId().equals(idEliminado)).toList();
+
+                List<Long> nuevo = idsOf2(algoritmo.rank(reducido, pesosEquilibrado, null, false));
+                int inversiones = contarInversiones(base, nuevo);
+
+                sb.append("| ").append(entry.getKey())
+                  .append(" | ").append(eliminado.getBrand()).append(" ").append(eliminado.getModel())
+                  .append(" (puesto ").append(posEliminada + 1).append(" de ").append(base.size()).append(")")
+                  .append(" | ").append(inversiones).append(" |\n");
+            }
+        }
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    private List<Long> idsOf2(List<RecommendationResult> resultados) {
+        return resultados.stream().map(r -> r.car().id()).toList();
+    }
+
+    /** Pares (i,j) presentes en ambos rankings cuyo orden relativo difiere. */
+    private int contarInversiones(List<Long> base, List<Long> nuevo) {
+        Map<Long, Integer> posNueva = new LinkedHashMap<>();
+        for (int i = 0; i < nuevo.size(); i++) posNueva.put(nuevo.get(i), i);
+
+        List<Long> comunes = base.stream().filter(posNueva::containsKey).toList();
+        int inversiones = 0;
+        for (int i = 0; i < comunes.size(); i++) {
+            for (int j = i + 1; j < comunes.size(); j++) {
+                if (posNueva.get(comunes.get(i)) > posNueva.get(comunes.get(j))) {
+                    inversiones++;
+                }
+            }
+        }
+        return inversiones;
     }
 
     // -------------------------------------------------------------------------

@@ -83,3 +83,14 @@ El resto de pesos se mantienen a 3. Se registra el primer clasificado de cada m�
 | 4 | Tesla Model 3 | Tesla Model 3 |
 | 5 | Tesla Model 3 | Tesla Model 3 |
 
+## 3. Análisis de rank reversal — perfil Equilibrado
+
+Se elimina una alternativa del conjunto y se recalcula el ranking. Se cuentan los pares de coches cuyo orden relativo se invierte respecto al ranking base (crítica de Belton y Gear, 1983, a TOPSIS: la normalización vectorial y las soluciones ideales dependen del conjunto de alternativas; en WSM la normalización min-max solo cambia si el coche eliminado era un extremo de algún criterio).
+
+| Método | Alternativa eliminada | Pares invertidos |
+|--------|----------------------|:----------------:|
+| WSM — Suma Ponderada | Kia EV3 (puesto 2 de 28) | 0 |
+| WSM — Suma Ponderada | Citroen C3 (puesto 28 de 28) | 0 |
+| TOPSIS | Kia EV3 (puesto 2 de 28) | 0 |
+| TOPSIS | BMW Serie 1 118 (puesto 28 de 28) | 1 |
+

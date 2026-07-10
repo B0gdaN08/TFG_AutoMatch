@@ -7,10 +7,12 @@ import CustomVehicleForm, { EMPTY_CUSTOM_VEHICLE, TYPE_OPTIONS } from '../compon
 import { CompareIcon } from '../components/icons';
 
 /**
- * Coste estimado de recorrer 100 km (mismas constantes que CarCosts.java
- * en el backend; aquí solo se usa para mostrar la fila de la tabla).
+ * Coste estimado de recorrer 100 km. Los coches del catálogo ya traen el dato
+ * calculado por el backend (CarCosts.java); la fórmula local solo se aplica a
+ * los vehículos personalizados, que no pasan por la API.
  */
 function energyCost100(car) {
+  if (car.energyCostPer100 != null) return car.energyCostPer100;
   switch (car.fuel) {
     case 'DIESEL':
       return car.consumption * 1.55;

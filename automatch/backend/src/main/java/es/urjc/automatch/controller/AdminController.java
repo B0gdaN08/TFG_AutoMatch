@@ -1,9 +1,9 @@
 package es.urjc.automatch.controller;
 
+import es.urjc.automatch.dto.AdminCarResponse;
 import es.urjc.automatch.dto.AdminDtos.StatsResponse;
 import es.urjc.automatch.dto.AdminDtos.UpdateRoleRequest;
 import es.urjc.automatch.dto.AdminDtos.UserSummary;
-import es.urjc.automatch.model.Car;
 import es.urjc.automatch.repository.CarRepository;
 import es.urjc.automatch.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,8 +32,8 @@ public class AdminController {
 
     @Operation(summary = "Listar todos los coches", description = "Devuelve todos los coches del sistema, incluyendo pendientes y rechazados")
     @GetMapping("/cars")
-    public List<Car> cars() {
-        return carRepository.findAll();
+    public List<AdminCarResponse> cars() {
+        return carRepository.findAll().stream().map(AdminCarResponse::from).toList();
     }
 
     @Operation(summary = "Listar usuarios", description = "Devuelve el listado de usuarios registrados")

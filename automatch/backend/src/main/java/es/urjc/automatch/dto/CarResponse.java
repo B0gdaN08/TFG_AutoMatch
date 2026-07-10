@@ -4,6 +4,7 @@ import es.urjc.automatch.model.Car;
 import es.urjc.automatch.model.CarStatus;
 import es.urjc.automatch.model.CarType;
 import es.urjc.automatch.model.FuelType;
+import es.urjc.automatch.service.CarCosts;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public record CarResponse(
         double equipment,
         double maintenancePerYear,
         double depreciation5y,
+        double energyCostPer100,
         String description,
         List<String> imageUrls,
         boolean own,
@@ -42,11 +44,14 @@ public record CarResponse(
     public static CarResponse from(Car car, Long currentUserId, boolean isAdmin) {
         boolean own = currentUserId != null && currentUserId.equals(car.getOwnerId());
         CarStatus status = (own || isAdmin) ? car.getStatus() : null;
+        // Coste de energia €/100km calculado en el backend (CarCosts) para que el
+        // frontend no tenga que duplicar las constantes de precios de carburante.
+        double energyCost = Math.round(CarCosts.energyCostPer100Km(car) * 100.0) / 100.0;
         return new CarResponse(
                 car.getId(), car.getBrand(), car.getModel(), car.getYear(), car.getPrice(),
                 car.getType(), car.getFuel(), car.getDgtLabel(), car.getConsumption(), car.getPowerCv(),
                 car.getTrunkLiters(), car.getSeats(), car.getReliability(), car.getSafety(), car.getEquipment(),
-                car.getMaintenancePerYear(), car.getDepreciation5y(), car.getDescription(), car.getImageUrls(),
-                own, car.getOwnerId() != null, status);
+                car.getMaintenancePerYear(), car.getDepreciation5y(), energyCost, car.getDescription(),
+                car.getImageUrls(), own, car.getOwnerId() != null, status);
     }
 }

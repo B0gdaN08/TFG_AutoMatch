@@ -1,0 +1,62 @@
+# Integración continua de AutoMatch: en cada push y pull request se ejecutan
+# los tests del backend (JUnit + JaCoCo), los del frontend (Vitest) y el build
+# de producción de Vite.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend · mvn verify
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: automatch/backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Tests y verificación
+        run: mvn -B verify
+
+      - name: Publicar informe de cobertura (JaCoCo)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-jacoco
+          path: automatch/backend/target/site/jacoco
+          if-no-files-found: ignore
+
+  frontend:
+    name: Frontend · vitest + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: automatch/frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: automatch/frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: Build de producción
+        run: npm run build

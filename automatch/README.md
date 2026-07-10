@@ -1,5 +1,7 @@
 # AutoMatch 🚗
 
+[![CI](https://github.com/B0gdaN08/TFG_AutoMatch/actions/workflows/ci.yml/badge.svg)](https://github.com/B0gdaN08/TFG_AutoMatch/actions/workflows/ci.yml)
+
 **Plataforma web de apoyo a la decisión de compra de coches** (TFG · Ingeniería Informática · URJC).
 
 AutoMatch ayuda a responder la pregunta "¿qué coche me compro?" con datos: catálogo filtrable del mercado español, comparador cara a cara, calculadora de **coste total de propiedad (TCO)** y un **recomendador multicriterio** que ordena los coches según las prioridades de cada usuario.
