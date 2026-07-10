@@ -1,0 +1,51 @@
+# ============================================================
+# AutoMatch en produccion local: PostgreSQL + backend + frontend
+#
+#   1) cp .env.example .env   (y cambia APP_JWT_SECRET)
+#   2) docker compose up --build
+#   3) abre http://localhost:5173
+# ============================================================
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: automatch
+      POSTGRES_USER: automatch
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-automatch}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U automatch -d automatch"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/automatch
+      SPRING_DATASOURCE_USERNAME: automatch
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-automatch}
+      # Obligatorio: sin APP_JWT_SECRET el backend no arranca (definir en .env)
+      APP_JWT_SECRET: ${APP_JWT_SECRET:?Falta APP_JWT_SECRET - copia .env.example a .env y define una clave}
+      APP_CORS_ORIGINS: http://localhost:5173
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
+  uploads:

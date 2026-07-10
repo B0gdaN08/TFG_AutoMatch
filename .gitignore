@@ -9,9 +9,10 @@ dist/
 **/backend/data/
 **/backend/uploads/
 
-# Variables de entorno
+# Variables de entorno (las plantillas .env.example si se versionan)
 .env
 .env.*
+!.env.example
 
 # Logs
 *.log

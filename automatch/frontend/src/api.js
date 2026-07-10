@@ -1,4 +1,7 @@
-const ORIGIN = 'http://localhost:8080';
+// URL del backend configurable en build (VITE_API_URL). Si no se define se usa
+// el backend local de desarrollo. Una cadena vacía significa "rutas relativas"
+// (en Docker, nginx hace de proxy de /api, /uploads e /images al backend).
+const ORIGIN = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 const API = `${ORIGIN}/api`;
 
 export const MAX_IMAGES = 6;

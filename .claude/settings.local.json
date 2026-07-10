@@ -87,7 +87,10 @@
       "Bash(npm view *)",
       "Bash(xxd)",
       "Bash(node fix-test.cjs)",
-      "Bash(sed -n '48,53p' src/api.test.js)"
+      "Bash(sed -n '48,53p' src/api.test.js)",
+      "Bash(npm test *)",
+      "Bash(docker --version)",
+      "Bash(APP_JWT_SECRET=clave-de-prueba-solo-para-validar-config-1234567890 docker compose config --quiet)"
     ]
   }
 }

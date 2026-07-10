@@ -3,6 +3,7 @@ package es.urjc.automatch.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.urjc.automatch.security.JwtAuthFilter;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -56,7 +57,7 @@ public class SecurityConfig {
                 }))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/h2-console/**").permitAll()
-                // TODO: restringir el acceso a Swagger UI / OpenAPI antes de pasar a produccion
+                // En produccion Swagger esta desactivado via springdoc.*.enabled=false (perfil prod)
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
@@ -84,11 +85,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /** Permite peticiones del frontend (Vite) en desarrollo. */
+    /** Origenes permitidos configurables: app.cors.origins (lista separada por comas). */
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${app.cors.origins}") List<String> allowedOrigins) {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
 
