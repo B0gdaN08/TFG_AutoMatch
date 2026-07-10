@@ -58,7 +58,7 @@ class RecommendationServiceTest {
 
     private RecommendationRequest request(Double maxPrice, List<CarType> types, List<FuelType> fuels,
                                             Integer minSeats, Map<String, Double> weights) {
-        return new RecommendationRequest(maxPrice, types, fuels, minSeats, weights);
+        return new RecommendationRequest(maxPrice, types, fuels, minSeats, weights, null);
     }
 
     private double criteriaScoreFor(List<RecommendationResult> resultados, Long carId, String criterio) {

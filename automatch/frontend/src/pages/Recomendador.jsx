@@ -30,6 +30,9 @@ export default function Recomendador() {
   const [fuels, setFuels] = useState([]);
   const [minSeats, setMinSeats] = useState('');
 
+  const [method, setMethod] = useState('WEIGHTED_SUM');
+  const [usedMethod, setUsedMethod] = useState(null);
+
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -57,9 +60,11 @@ export default function Recomendador() {
           fuels,
           minSeats: minSeats ? Number(minSeats) : null,
           weights,
+          method,
         },
       });
       setResults(data);
+      setUsedMethod(method);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -98,6 +103,15 @@ export default function Recomendador() {
               <span className="slider-value">{weights[criterion.key]}</span>
             </label>
           ))}
+
+          <h2>Algoritmo</h2>
+          <label className="field">
+            Método de cálculo
+            <select value={method} onChange={(e) => setMethod(e.target.value)}>
+              <option value="WEIGHTED_SUM">Suma Ponderada — media ponderada de criterios normalizados</option>
+              <option value="TOPSIS">TOPSIS — proximidad a la solución ideal (Hwang y Yoon, 1981)</option>
+            </select>
+          </label>
 
           <h2>Filtros</h2>
           <label className="field">
@@ -168,6 +182,13 @@ export default function Recomendador() {
               <span className="icon-tile"><TargetIcon /></span>
               <p>Ningún coche cumple esos filtros. Prueba a relajarlos.</p>
             </div>
+          )}
+
+          {results && results.length > 0 && (
+            <p className="muted" style={{ marginBottom: '0.5rem' }}>
+              Método usado:{' '}
+              <strong>{usedMethod === 'TOPSIS' ? 'TOPSIS (Hwang y Yoon)' : 'Suma Ponderada'}</strong>
+            </p>
           )}
 
           {results && results.map((result, index) => (

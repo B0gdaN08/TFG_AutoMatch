@@ -11,11 +11,13 @@ import java.util.Map;
  * weights: importancia 0-5 para cada criterio:
  *   price, efficiency, reliability, safety, space, performance, equipment
  * Los filtros (maxPrice, types, fuels, minSeats) son restricciones duras.
+ * method: algoritmo a usar — "WEIGHTED_SUM" (por defecto) o "TOPSIS".
  */
 public record RecommendationRequest(
         Double maxPrice,
         List<CarType> types,
         List<FuelType> fuels,
         Integer minSeats,
-        Map<String, Double> weights) {
+        Map<String, Double> weights,
+        String method) {
 }

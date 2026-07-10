@@ -38,5 +38,9 @@ C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\back
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ImageCleanupService.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ImageStorageService.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\LoginAttemptService.java
+C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ranking\AlgoUtils.java
+C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ranking\RankingAlgorithm.java
+C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ranking\TopsisAlgorithm.java
+C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ranking\WeightedSumAlgorithm.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\RecommendationService.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\TcoService.java
