@@ -105,7 +105,17 @@
       "Bash(sed -i \"s|C:.*msedge.exe|C:/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe|\" mobileshot.js)",
       "Bash(node mobileshot.js)",
       "Bash(grep -n '\\\\.filters input\\\\|\\\\.filters select\\\\|^input,\\\\|^select,\\\\|^select {' -A 10 /c/Users/Usuario/Desktop/TFG_Informatica_Bueno/automatch-rediseno/automatch/frontend/src/styles.css)",
-      "Bash(python -)"
+      "Bash(python -)",
+      "Bash(docker info *)",
+      "Bash(docker compose *)",
+      "Bash(curl -sL -o 'C:\\\\Users\\\\Usuario/AppData/Local/Temp/claude/c--Users-Usuario-Desktop-TFG-Informatica-Bueno-automatch-rediseno/4a37d8f4-2d95-4ffe-b6c3-c550ae0fb00c/scratchpad/tools/cloudflared.exe' https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe)",
+      "Bash('C:\\\\Users\\\\Usuario/AppData/Local/Temp/claude/c--Users-Usuario-Desktop-TFG-Informatica-Bueno-automatch-rediseno/4a37d8f4-2d95-4ffe-b6c3-c550ae0fb00c/scratchpad/tools/cloudflared.exe' --version)",
+      "Bash('C:\\\\Users\\\\Usuario/AppData/Local/Temp/claude/c--Users-Usuario-Desktop-TFG-Informatica-Bueno-automatch-rediseno/4a37d8f4-2d95-4ffe-b6c3-c550ae0fb00c/scratchpad/tools/cloudflared.exe' tunnel *)",
+      "Bash(curl -s -o /dev/null -w 'HTTP %{http_code}\\\\n' https://fiber-spirit-capabilities-pete.trycloudflare.com/)",
+      "Bash(curl -s https://fiber-spirit-capabilities-pete.trycloudflare.com/api/cars?size=1)",
+      "Bash(curl -s -o /dev/null -w 'HTTP %{http_code}\\\\n' -X POST https://fiber-spirit-capabilities-pete.trycloudflare.com/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"demo@automatch.es\",\"password\":\"demo123\"}')",
+      "Bash(curl -s -w '\\\\nHTTP %{http_code}\\\\n' -X POST https://fiber-spirit-capabilities-pete.trycloudflare.com/api/auth/login -H 'Content-Type: application/json' -H 'Origin: https://fiber-spirit-capabilities-pete.trycloudflare.com' -d '{\"email\":\"demo@automatch.es\",\"password\":\"demo123\"}')",
+      "Bash(docker exec *)"
     ]
   }
 }
