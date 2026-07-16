@@ -10,6 +10,7 @@ import es.urjc.automatch.model.CarType;
 import es.urjc.automatch.model.FuelType;
 import es.urjc.automatch.security.AuthUtils;
 import es.urjc.automatch.service.CarService;
+import es.urjc.automatch.service.ModelScoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -39,9 +40,11 @@ public class CarController {
     );
 
     private final CarService carService;
+    private final ModelScoreService modelScoreService;
 
-    public CarController(CarService carService) {
+    public CarController(CarService carService, ModelScoreService modelScoreService) {
         this.carService = carService;
+        this.modelScoreService = modelScoreService;
     }
 
     @Operation(summary = "Listar coches paginado",
@@ -70,6 +73,13 @@ public class CarController {
         boolean isAdmin = AuthUtils.isAdmin(auth);
         Page<Car> carPage = carService.findAll(search, type, fuel, minPrice, maxPrice, dgtLabel, pageable);
         return PageResponse.of(carService.toResponsePage(carPage, email, isAdmin));
+    }
+
+    @Operation(summary = "Marcas y modelos conocidos",
+               description = "Base de conocimiento de modelos para los desplegables del formulario de venta")
+    @GetMapping("/models")
+    public List<ModelScoreService.BrandModels> models() {
+        return modelScoreService.brandCatalog();
     }
 
     @Operation(summary = "Todos los coches aprobados",

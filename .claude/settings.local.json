@@ -116,7 +116,13 @@
       "Bash(curl -s -o /dev/null -w 'HTTP %{http_code}\\\\n' -X POST https://fiber-spirit-capabilities-pete.trycloudflare.com/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"demo@automatch.es\",\"password\":\"demo123\"}')",
       "Bash(curl -s -w '\\\\nHTTP %{http_code}\\\\n' -X POST https://fiber-spirit-capabilities-pete.trycloudflare.com/api/auth/login -H 'Content-Type: application/json' -H 'Origin: https://fiber-spirit-capabilities-pete.trycloudflare.com' -d '{\"email\":\"demo@automatch.es\",\"password\":\"demo123\"}')",
       "Bash(docker exec *)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(sed -i \"s|headless: 'new' }|headless: 'new', userDataDir: './edge-profile', args: ['--no-first-run'] }|\" vender.js)",
+      "Bash(node vender.js)",
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless=new --disable-gpu --dump-dom \"about:blank\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(curl -s -o /dev/null -w \"Vite dev server: HTTP %{http_code}\\\\n\" http://localhost:5173/vender)",
+      "Bash(npx vitest *)"
     ]
   }
 }

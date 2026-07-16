@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -146,6 +147,28 @@ class PuntuacionesAutomaticasFlowTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reliability").value(9.5))
                 .andExpect(jsonPath("$.safety").value(9.0));
+    }
+
+    @Test
+    void elCatalogoDeMarcasYModelosEsPublicoYVieneDeLaBaseDeConocimiento() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/cars/models"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var json = objectMapper.readTree(result.getResponse().getContentAsString());
+        org.assertj.core.api.Assertions.assertThat(json.isArray()).isTrue();
+        org.assertj.core.api.Assertions.assertThat(json.size()).isGreaterThanOrEqualTo(30); // 35 marcas con V4
+
+        // Toyota debe existir y contener el Corolla 140H de la base de conocimiento
+        boolean toyotaConCorolla = false;
+        for (var marca : json) {
+            if ("Toyota".equals(marca.get("brand").asText())) {
+                for (var modelo : marca.get("models")) {
+                    if ("Corolla 140H".equals(modelo.asText())) toyotaConCorolla = true;
+                }
+            }
+        }
+        org.assertj.core.api.Assertions.assertThat(toyotaConCorolla).isTrue();
     }
 
     @Test

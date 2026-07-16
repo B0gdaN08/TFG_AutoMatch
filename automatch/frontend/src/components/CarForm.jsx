@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FUEL_LABELS, TYPE_LABELS, MAX_IMAGES, imageUrl, uploadImage } from '../api';
+import { useEffect, useState } from 'react';
+import { request, FUEL_LABELS, TYPE_LABELS, MAX_IMAGES, imageUrl, uploadImage } from '../api';
 
 const DGT_LABELS = ['C', 'ECO', 'CERO'];
 
@@ -51,15 +51,46 @@ function toFormValues(car) {
 }
 
 /**
- * expertFields: si es false (anuncios de usuarios), la fiabilidad, seguridad,
- * equipamiento, mantenimiento y depreciación no se muestran ni se envían:
- * los asigna automáticamente el backend a partir de marca, modelo y año.
- * El admin (catálogo) los sigue editando a mano.
+ * sellerMode (anuncios de usuarios):
+ *  - La marca y el modelo se eligen de desplegables alimentados por la base de
+ *    conocimiento (GET /api/cars/models), con opción "Otra/Otro" para coches
+ *    fuera de la lista (recibirán la media de su marca o la global).
+ *  - La fiabilidad, seguridad, equipamiento, mantenimiento y depreciación no se
+ *    muestran ni se envían: los asigna automáticamente el backend.
+ * El admin (catálogo) mantiene todos los campos libres y editables.
  */
-export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar', loading = false, expertFields = true }) {
+export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar', loading = false, sellerMode = false }) {
+  const expertFields = !sellerMode;
   const [values, setValues] = useState(() => toFormValues(initialValue));
   const [uploading, setUploading] = useState(false);
   const [imageError, setImageError] = useState('');
+
+  // Base de conocimiento para los desplegables del vendedor
+  const [catalog, setCatalog] = useState([]);
+  const [customBrand, setCustomBrand] = useState(false);
+  const [customModel, setCustomModel] = useState(false);
+
+  useEffect(() => {
+    if (!sellerMode) return;
+    request('/cars/models')
+      .then((data) => {
+        setCatalog(data);
+        // Anuncios antiguos con marca/modelo escritos a mano: mantenerlos como "Otro"
+        const brand = initialValue?.brand;
+        if (brand && !data.some((b) => b.brand === brand)) {
+          setCustomBrand(true);
+          setCustomModel(true);
+        } else if (brand && initialValue?.model) {
+          const models = data.find((b) => b.brand === brand)?.models ?? [];
+          if (!models.includes(initialValue.model)) setCustomModel(true);
+        }
+      })
+      .catch(() => setCatalog([])); // sin catálogo, el formulario cae a campos libres
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sellerMode]);
+
+  const brandModels = catalog.find((b) => b.brand === values.brand)?.models ?? [];
+  const useDropdowns = sellerMode && catalog.length > 0;
 
   function setField(field, value) {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -146,14 +177,105 @@ export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar
         {imageError && <p className="alert">{imageError}</p>}
       </div>
 
-      <label className="field">
-        Marca
-        <input value={values.brand} onChange={(e) => setField('brand', e.target.value)} required />
-      </label>
-      <label className="field">
-        Modelo
-        <input value={values.model} onChange={(e) => setField('model', e.target.value)} required />
-      </label>
+      {useDropdowns ? (
+        <>
+          <label className="field">
+            Marca
+            <select
+              value={customBrand ? '__otra__' : values.brand}
+              onChange={(e) => {
+                if (e.target.value === '__otra__') {
+                  setCustomBrand(true);
+                  setCustomModel(true);
+                  setField('brand', '');
+                  setField('model', '');
+                } else {
+                  setCustomBrand(false);
+                  setCustomModel(false);
+                  setField('brand', e.target.value);
+                  setField('model', '');
+                }
+              }}
+              required={!customBrand}
+            >
+              <option value="">Elige la marca…</option>
+              {catalog.map((b) => (
+                <option key={b.brand} value={b.brand}>{b.brand}</option>
+              ))}
+              <option value="__otra__">Otra marca…</option>
+            </select>
+            {customBrand && (
+              <input
+                placeholder="Escribe la marca"
+                value={values.brand}
+                onChange={(e) => setField('brand', e.target.value)}
+                required
+              />
+            )}
+          </label>
+          <label className="field">
+            Modelo
+            {customBrand || customModel ? (
+              <>
+                {!customBrand && (
+                  <select
+                    value="__otro__"
+                    onChange={(e) => {
+                      if (e.target.value !== '__otro__') {
+                        setCustomModel(false);
+                        setField('model', e.target.value);
+                      }
+                    }}
+                  >
+                    <option value="">Elige el modelo…</option>
+                    {brandModels.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                    <option value="__otro__">Otro modelo…</option>
+                  </select>
+                )}
+                <input
+                  placeholder="Escribe el modelo"
+                  value={values.model}
+                  onChange={(e) => setField('model', e.target.value)}
+                  required
+                />
+              </>
+            ) : (
+              <select
+                value={values.model}
+                onChange={(e) => {
+                  if (e.target.value === '__otro__') {
+                    setCustomModel(true);
+                    setField('model', '');
+                  } else {
+                    setField('model', e.target.value);
+                  }
+                }}
+                disabled={!values.brand}
+                required
+              >
+                <option value="">{values.brand ? 'Elige el modelo…' : 'Elige antes la marca'}</option>
+                {brandModels.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+                <option value="__otro__">Otro modelo…</option>
+              </select>
+            )}
+          </label>
+        </>
+      ) : (
+        <>
+          <label className="field">
+            Marca
+            <input value={values.brand} onChange={(e) => setField('brand', e.target.value)} required />
+          </label>
+          <label className="field">
+            Modelo
+            <input value={values.model} onChange={(e) => setField('model', e.target.value)} required />
+          </label>
+        </>
+      )}
       <label className="field">
         Año
         <input type="number" min="1990" max="2100" value={values.year}

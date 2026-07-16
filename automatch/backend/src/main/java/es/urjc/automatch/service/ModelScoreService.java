@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import java.text.Normalizer;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * Determina automaticamente las puntuaciones "expertas" de un coche
@@ -33,10 +36,24 @@ public class ModelScoreService {
                                   double maintenancePerYear, double depreciation5y, String source) {
     }
 
+    /** Una marca con sus modelos conocidos, para los desplegables del formulario de venta. */
+    public record BrandModels(String brand, List<String> models) {
+    }
+
     private final ModelScoreRepository repository;
 
     public ModelScoreService(ModelScoreRepository repository) {
         this.repository = repository;
+    }
+
+    /** Marcas y modelos de la base de conocimiento, ordenados alfabeticamente. */
+    public List<BrandModels> brandCatalog() {
+        Map<String, List<String>> byBrand = repository.findAll().stream()
+                .collect(Collectors.groupingBy(ModelScore::getBrand, TreeMap::new,
+                        Collectors.mapping(ModelScore::getModel, Collectors.toList())));
+        return byBrand.entrySet().stream()
+                .map(e -> new BrandModels(e.getKey(), e.getValue().stream().distinct().sorted().toList()))
+                .toList();
     }
 
     public ResolvedScores resolve(String brand, String model, int year) {
@@ -48,11 +65,25 @@ public class ModelScoreService {
                 .filter(m -> normalize(m.getBrand()).equals(normBrand))
                 .toList();
 
-        // 1) Coincidencia de modelo dentro de la marca (exacta o por contencion)
+        // 1a) Coincidencia EXACTA de modelo dentro de la marca (gana siempre:
+        //     "Seal" debe resolver a la ficha "Seal" aunque exista "Seal U")
+        List<ModelScore> exactMatches = sameBrand.stream()
+                .filter(m -> normalize(m.getModel()).equals(normModel))
+                .toList();
+        if (!exactMatches.isEmpty()) {
+            ModelScore best = exactMatches.stream()
+                    .min(Comparator.comparingInt(m -> Math.abs(m.getYear() - year)))
+                    .orElseThrow();
+            return new ResolvedScores(best.getReliability(), best.getSafety(), best.getEquipment(),
+                    best.getMaintenancePerYear(), best.getDepreciation5y(), "MODELO");
+        }
+
+        // 1b) Coincidencia por contencion ("Corolla" encaja con "Corolla 140H");
+        //     entre varias gana la ficha mas especifica y despues el año mas cercano
         List<ModelScore> modelMatches = sameBrand.stream()
                 .filter(m -> {
                     String ref = normalize(m.getModel());
-                    return ref.equals(normModel) || ref.contains(normModel) || normModel.contains(ref);
+                    return ref.contains(normModel) || normModel.contains(ref);
                 })
                 .toList();
         if (!modelMatches.isEmpty()) {
@@ -97,11 +128,14 @@ public class ModelScoreService {
         return Math.round(value * 100.0) / 100.0;
     }
 
-    /** minusculas, sin acentos y con espacios colapsados: "León " -> "leon". */
+    /**
+     * Normalizacion para el matching: minusculas, sin acentos y sin signos ni
+     * espacios. Asi "León" = "leon", "T Roc" = "T-Roc" = "troc" e "ID3" = "ID.3".
+     */
     private static String normalize(String text) {
         if (text == null) return "";
         String lower = Normalizer.normalize(text.toLowerCase().trim(), Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "");
-        return lower.replaceAll("\\s+", " ");
+        return lower.replaceAll("[^a-z0-9]", "");
     }
 }
