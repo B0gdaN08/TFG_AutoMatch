@@ -50,7 +50,13 @@ function toFormValues(car) {
   };
 }
 
-export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar', loading = false }) {
+/**
+ * expertFields: si es false (anuncios de usuarios), la fiabilidad, seguridad,
+ * equipamiento, mantenimiento y depreciación no se muestran ni se envían:
+ * los asigna automáticamente el backend a partir de marca, modelo y año.
+ * El admin (catálogo) los sigue editando a mano.
+ */
+export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar', loading = false, expertFields = true }) {
   const [values, setValues] = useState(() => toFormValues(initialValue));
   const [uploading, setUploading] = useState(false);
   const [imageError, setImageError] = useState('');
@@ -92,7 +98,7 @@ export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar
 
   function handleSubmit(e) {
     e.preventDefault();
-    onSubmit({
+    const payload = {
       imageUrls: values.images,
       brand: values.brand,
       model: values.model,
@@ -105,13 +111,16 @@ export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar
       powerCv: Number(values.powerCv),
       trunkLiters: Number(values.trunkLiters),
       seats: Number(values.seats),
-      reliability: Number(values.reliability),
-      safety: Number(values.safety),
-      equipment: Number(values.equipment),
-      maintenancePerYear: Number(values.maintenancePerYear),
-      depreciation5y: Number(values.depreciation5y) / 100,
       description: values.description,
-    });
+    };
+    if (expertFields) {
+      payload.reliability = Number(values.reliability);
+      payload.safety = Number(values.safety);
+      payload.equipment = Number(values.equipment);
+      payload.maintenancePerYear = Number(values.maintenancePerYear);
+      payload.depreciation5y = Number(values.depreciation5y) / 100;
+    }
+    onSubmit(payload);
   }
 
   return (
@@ -199,31 +208,42 @@ export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar
         <input type="number" min="2" max="9" step="1" value={values.seats}
                onChange={(e) => setField('seats', e.target.value)} required />
       </label>
-      <label className="field">
-        Fiabilidad (1-10)
-        <input type="number" min="1" max="10" step="0.1" value={values.reliability}
-               onChange={(e) => setField('reliability', e.target.value)} required />
-      </label>
-      <label className="field">
-        Seguridad (1-10)
-        <input type="number" min="1" max="10" step="0.1" value={values.safety}
-               onChange={(e) => setField('safety', e.target.value)} required />
-      </label>
-      <label className="field">
-        Equipamiento (1-10)
-        <input type="number" min="1" max="10" step="0.1" value={values.equipment}
-               onChange={(e) => setField('equipment', e.target.value)} required />
-      </label>
-      <label className="field">
-        Mantenimiento (€/año)
-        <input type="number" min="0" step="10" value={values.maintenancePerYear}
-               onChange={(e) => setField('maintenancePerYear', e.target.value)} required />
-      </label>
-      <label className="field">
-        Depreciación a 5 años (%)
-        <input type="number" min="0" max="100" step="1" value={values.depreciation5y}
-               onChange={(e) => setField('depreciation5y', e.target.value)} required />
-      </label>
+      {expertFields ? (
+        <>
+          <label className="field">
+            Fiabilidad (1-10)
+            <input type="number" min="1" max="10" step="0.1" value={values.reliability}
+                   onChange={(e) => setField('reliability', e.target.value)} required />
+          </label>
+          <label className="field">
+            Seguridad (1-10)
+            <input type="number" min="1" max="10" step="0.1" value={values.safety}
+                   onChange={(e) => setField('safety', e.target.value)} required />
+          </label>
+          <label className="field">
+            Equipamiento (1-10)
+            <input type="number" min="1" max="10" step="0.1" value={values.equipment}
+                   onChange={(e) => setField('equipment', e.target.value)} required />
+          </label>
+          <label className="field">
+            Mantenimiento (€/año)
+            <input type="number" min="0" step="10" value={values.maintenancePerYear}
+                   onChange={(e) => setField('maintenancePerYear', e.target.value)} required />
+          </label>
+          <label className="field">
+            Depreciación a 5 años (%)
+            <input type="number" min="0" max="100" step="1" value={values.depreciation5y}
+                   onChange={(e) => setField('depreciation5y', e.target.value)} required />
+          </label>
+        </>
+      ) : (
+        <p className="alert alert-info field-full">
+          La fiabilidad, la seguridad, el equipamiento, el mantenimiento y la
+          depreciación <strong>los calcula AutoMatch automáticamente</strong> a
+          partir de la marca, el modelo y el año, con datos de referencia del
+          mercado. Así todos los anuncios compiten con las mismas reglas.
+        </p>
+      )}
       <label className="field field-full">
         Descripción
         <textarea rows="3" maxLength="600" value={values.description}

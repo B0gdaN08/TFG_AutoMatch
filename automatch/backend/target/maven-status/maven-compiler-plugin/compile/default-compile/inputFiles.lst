@@ -26,10 +26,12 @@ C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\back
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\model\CarType.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\model\Favorite.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\model\FuelType.java
+C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\model\ModelScore.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\model\User.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\repository\CarRepository.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\repository\CarSpecifications.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\repository\FavoriteRepository.java
+C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\repository\ModelScoreRepository.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\repository\UserRepository.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\security\AuthUtils.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\security\JwtAuthFilter.java
@@ -42,6 +44,7 @@ C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\back
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ImageCleanupService.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ImageStorageService.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\LoginAttemptService.java
+C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ModelScoreService.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ranking\AlgoUtils.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ranking\RankingAlgorithm.java
 C:\Users\Usuario\Desktop\TFG_Informatica_Bueno\automatch-rediseno\automatch\backend\src\main\java\es\urjc\automatch\service\ranking\TopsisAlgorithm.java

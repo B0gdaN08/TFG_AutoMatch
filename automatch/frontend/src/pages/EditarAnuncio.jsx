@@ -74,6 +74,7 @@ export default function EditarAnuncio() {
             onSubmit={handleSubmit}
             submitLabel="Guardar cambios"
             loading={loading}
+            expertFields={false}
           />
         </div>
       )}

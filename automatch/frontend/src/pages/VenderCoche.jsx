@@ -53,7 +53,7 @@ export default function VenderCoche() {
       </p>
       {error && <p className="alert">{error}</p>}
       <div className="card">
-        <CarForm onSubmit={handleSubmit} submitLabel="Publicar anuncio" loading={loading} />
+        <CarForm onSubmit={handleSubmit} submitLabel="Publicar anuncio" loading={loading} expertFields={false} />
       </div>
     </section>
   );

@@ -55,24 +55,29 @@ public record CarRequest(
         @Max(value = 9, message = "Las plazas deben estar entre 2 y 9")
         int seats,
 
+        // --- Puntuaciones "expertas": OPCIONALES ---
+        // En los anuncios de usuarios se ignoran y las asigna automaticamente
+        // ModelScoreService a partir de marca/modelo/año. Solo el admin puede
+        // fijarlas a mano (si omite alguna, tambien se resuelven automaticamente).
+
         @DecimalMin(value = "1", message = "La fiabilidad debe estar entre 1 y 10")
         @DecimalMax(value = "10", message = "La fiabilidad debe estar entre 1 y 10")
-        double reliability,
+        Double reliability,
 
         @DecimalMin(value = "1", message = "La seguridad debe estar entre 1 y 10")
         @DecimalMax(value = "10", message = "La seguridad debe estar entre 1 y 10")
-        double safety,
+        Double safety,
 
         @DecimalMin(value = "1", message = "El equipamiento debe estar entre 1 y 10")
         @DecimalMax(value = "10", message = "El equipamiento debe estar entre 1 y 10")
-        double equipment,
+        Double equipment,
 
         @PositiveOrZero(message = "El mantenimiento no puede ser negativo")
-        double maintenancePerYear,
+        Double maintenancePerYear,
 
         @DecimalMin(value = "0", message = "La depreciación a 5 años debe estar entre 0 y 1")
         @DecimalMax(value = "1", message = "La depreciación a 5 años debe estar entre 0 y 1")
-        double depreciation5y,
+        Double depreciation5y,
 
         @Size(max = 600, message = "La descripción no puede superar los 600 caracteres")
         String description,

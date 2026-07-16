@@ -34,13 +34,16 @@ public class CarService {
     private final UserRepository userRepository;
     private final FavoriteRepository favoriteRepository;
     private final ImageStorageService imageStorageService;
+    private final ModelScoreService modelScoreService;
 
     public CarService(CarRepository carRepository, UserRepository userRepository,
-                       FavoriteRepository favoriteRepository, ImageStorageService imageStorageService) {
+                       FavoriteRepository favoriteRepository, ImageStorageService imageStorageService,
+                       ModelScoreService modelScoreService) {
         this.carRepository = carRepository;
         this.userRepository = userRepository;
         this.favoriteRepository = favoriteRepository;
         this.imageStorageService = imageStorageService;
+        this.modelScoreService = modelScoreService;
     }
 
     private User userByEmail(String email) {
@@ -121,10 +124,15 @@ public class CarService {
         return carRepository.findByStatus(CarStatus.PENDING);
     }
 
-    /** Un usuario publica su propio coche en venta: queda pendiente de revision. */
+    /**
+     * Un usuario publica su propio coche en venta: queda pendiente de revision.
+     * Las puntuaciones expertas NO las elige el vendedor: se asignan automaticamente
+     * desde la base de conocimiento de modelos.
+     */
     public Car createListing(CarRequest request, String email) {
         User user = userByEmail(email);
         Car car = toEntity(request);
+        applyScores(car, request, false);
         car.setOwnerId(user.getId());
         car.setStatus(CarStatus.PENDING);
         return carRepository.save(car);
@@ -133,6 +141,7 @@ public class CarService {
     /** El admin anade un coche directamente al catalogo oficial. */
     public Car createCatalogCar(CarRequest request) {
         Car car = toEntity(request);
+        applyScores(car, request, true);
         car.setOwnerId(null);
         car.setStatus(CarStatus.APPROVED);
         return carRepository.save(car);
@@ -157,6 +166,7 @@ public class CarService {
             }
         }
         applyRequest(car, request);
+        applyScores(car, request, isAdmin);
         return carRepository.save(car);
     }
 
@@ -233,12 +243,38 @@ public class CarService {
         car.setPowerCv(request.powerCv());
         car.setTrunkLiters(request.trunkLiters());
         car.setSeats(request.seats());
-        car.setReliability(request.reliability());
-        car.setSafety(request.safety());
-        car.setEquipment(request.equipment());
-        car.setMaintenancePerYear(request.maintenancePerYear());
-        car.setDepreciation5y(request.depreciation5y());
         car.setDescription(request.description());
         car.setImageUrls(request.imageUrls() == null ? new ArrayList<>() : new ArrayList<>(request.imageUrls()));
+    }
+
+    /**
+     * Asigna las puntuaciones expertas (fiabilidad, seguridad, equipamiento,
+     * mantenimiento y depreciacion). Solo se respetan las del request cuando
+     * quien edita es admin Y las envia todas; en cualquier otro caso se
+     * resuelven automaticamente desde la base de conocimiento de modelos.
+     */
+    private void applyScores(Car car, CarRequest request, boolean trustRequest) {
+        boolean allProvided = request.reliability() != null && request.safety() != null
+                && request.equipment() != null && request.maintenancePerYear() != null
+                && request.depreciation5y() != null;
+        if (trustRequest && allProvided) {
+            car.setReliability(request.reliability());
+            car.setSafety(request.safety());
+            car.setEquipment(request.equipment());
+            car.setMaintenancePerYear(request.maintenancePerYear());
+            car.setDepreciation5y(request.depreciation5y());
+            return;
+        }
+
+        ModelScoreService.ResolvedScores scores =
+                modelScoreService.resolve(request.brand(), request.model(), request.year());
+        car.setReliability(scores.reliability());
+        car.setSafety(scores.safety());
+        car.setEquipment(scores.equipment());
+        car.setMaintenancePerYear(scores.maintenancePerYear());
+        car.setDepreciation5y(scores.depreciation5y());
+        log.info("Puntuaciones auto-asignadas a {} {} ({}): fiab={} seg={} equip={} [fuente={}]",
+                request.brand(), request.model(), request.year(),
+                scores.reliability(), scores.safety(), scores.equipment(), scores.source());
     }
 }

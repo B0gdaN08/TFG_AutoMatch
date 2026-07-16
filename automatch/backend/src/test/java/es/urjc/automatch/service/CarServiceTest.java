@@ -30,12 +30,15 @@ class CarServiceTest {
     private FavoriteRepository favoriteRepository;
     @Mock
     private ImageStorageService imageStorageService;
+    @Mock
+    private ModelScoreService modelScoreService;
 
     private CarService carService;
 
     @BeforeEach
     void setUp() {
-        carService = new CarService(carRepository, userRepository, favoriteRepository, imageStorageService);
+        carService = new CarService(carRepository, userRepository, favoriteRepository,
+                imageStorageService, modelScoreService);
     }
 
     private Car carWithStatus(CarStatus status, Long ownerId) {
