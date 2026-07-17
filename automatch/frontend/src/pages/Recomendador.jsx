@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { request, FUEL_LABELS, TYPE_LABELS, formatEuro } from '../api';
+import { request, FUEL_LABELS, TYPE_LABELS, formatEuro, imageUrl } from '../api';
 import { addToCompare, removeFromCompare, useCompareIds, MAX_COMPARE } from '../compare';
 import Plate from '../components/Plate';
 import ScoreBar from '../components/ScoreBar';
@@ -284,6 +284,17 @@ export default function Recomendador() {
           {results && results.map((result, index) => (
             <article key={result.car.id} className="card reco-card">
               <div className="reco-rank">{index + 1}</div>
+              <div className="reco-photo">
+                {result.car.imageUrls?.length > 0 ? (
+                  <img
+                    src={imageUrl(result.car.imageUrls[0])}
+                    alt={`${result.car.brand} ${result.car.model}`}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="reco-photo-placeholder" aria-hidden="true">🚗</div>
+                )}
+              </div>
               <div className="reco-body">
                 <div className="reco-head">
                   <Plate text={result.car.brand} />
