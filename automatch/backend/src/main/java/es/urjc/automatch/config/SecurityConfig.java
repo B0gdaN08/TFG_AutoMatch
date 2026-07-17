@@ -38,7 +38,6 @@ public class SecurityConfig {
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
-            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // para la consola H2
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(exceptions -> exceptions
                 // Sin token o token invalido/caducado -> 401 (el frontend cierra sesion y pide volver a entrar)
@@ -56,7 +55,6 @@ public class SecurityConfig {
                             Map.of("message", "No tienes permisos para esta acción"));
                 }))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/h2-console/**").permitAll()
                 // En produccion Swagger esta desactivado via springdoc.*.enabled=false (perfil prod)
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()

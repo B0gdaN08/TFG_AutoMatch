@@ -23,7 +23,7 @@ AutoMatch ayuda a responder la pregunta "¿qué coche me compro?" con datos: cat
 | Capa | Tecnología |
 |------|------------|
 | Backend | Spring Boot 3.4 · Java 21 · Spring Security (JWT) · Spring Data JPA |
-| Base de datos | H2 en fichero (desarrollo) · PostgreSQL 16 (producción) · migraciones con **Flyway** |
+| Base de datos | **PostgreSQL 16** (desarrollo y producción) · migraciones con **Flyway** · H2 en memoria solo para tests |
 | Frontend | React 18 · Vite · React Router · CSS propio (sin frameworks) |
 | Despliegue | Docker multi-stage + nginx + docker compose |
 
@@ -43,9 +43,9 @@ automatch/
 │       │   └── config/           # Seguridad, CORS y datos de ejemplo
 │       └── resources/
 │           ├── application.properties        # común (defecto: perfil dev)
-│           ├── application-dev.properties    # H2 + consola + Swagger
+│           ├── application-dev.properties    # PostgreSQL local (db-dev) + Swagger
 │           ├── application-prod.properties   # PostgreSQL + endurecido
-│           └── db/migration/                 # V1 esquema, V2 usuarios (Flyway)
+│           └── db/migration/                 # Flyway: esquema, usuarios y fichas de modelos
 └── frontend/                 # SPA React (puerto 5173)
     ├── Dockerfile            # build de Vite servido con nginx (proxy /api)
     └── src/
@@ -54,22 +54,28 @@ automatch/
         └── api.js            # Cliente HTTP con el token JWT
 ```
 
-## Arranque en desarrollo (igual que siempre)
+## Arranque en desarrollo
 
-Requisitos: **Java 21**, **Maven 3.9+** y **Node 18+**.
+Requisitos: **Java 21**, **Maven 3.9+**, **Node 18+** y **Docker** (para la base de datos).
 
-**1. Backend** (en una terminal):
+**1. Base de datos** (PostgreSQL de desarrollo, primera vez y tras reinicios):
+
+```bash
+docker compose --profile dev up -d db-dev
+```
+
+**2. Backend** (en una terminal):
 
 ```bash
 cd backend
 mvn spring-boot:run
 ```
 
-Arranca con el perfil `dev` por defecto: H2 en fichero (`backend/data/`), consola H2 y Swagger abiertos. Flyway crea el esquema y los usuarios; el catálogo de ejemplo lo siembra `DataLoader` la primera vez.
+Arranca con el perfil `dev` por defecto contra PostgreSQL local (usuario/contraseña/BD: `automatch`). Flyway crea el esquema, los usuarios y la base de conocimiento de modelos; el catálogo de ejemplo lo siembra `DataLoader` la primera vez. Swagger queda abierto en dev.
 
-> **Nota (BDs anteriores a Flyway):** si tu `backend/data/` es de una versión anterior, Flyway lo adopta automáticamente (`baseline-on-migrate`). Si algo no cuadra al validar el esquema, borra la carpeta `backend/data/` y arranca de nuevo: se regenera con los datos de ejemplo.
+> **Para empezar de cero** (regenerar los datos de ejemplo): `docker compose --profile dev down -v` y volver a arrancar.
 
-**2. Frontend** (en otra terminal):
+**3. Frontend** (en otra terminal):
 
 ```bash
 cd frontend
@@ -86,10 +92,11 @@ Abre **http://localhost:5173**.
 | demo@automatch.es | demo123 | Usuario |
 | admin@automatch.es | admin123 | Admin (moderación y CRUD de coches) |
 
-### Consola de la base de datos (solo dev)
+### Inspeccionar la base de datos (solo dev)
 
-Con el backend arrancado: http://localhost:8080/h2-console
-JDBC URL `jdbc:h2:file:./data/automatch` · usuario `sa` · sin contraseña.
+Adminer (interfaz web): `docker compose --profile dev up -d adminer` y abre http://localhost:8081
+Sistema `PostgreSQL` · Servidor `db-dev` · usuario/contraseña/BD: `automatch`.
+O por consola: `docker exec -it automatch-db-dev-1 psql -U automatch`.
 
 ### Documentación de la API (solo dev)
 
@@ -138,8 +145,9 @@ Documentadas también en [.env.example](.env.example) y [frontend/.env.example](
 
 ## Migraciones (Flyway)
 
-- `V1__esquema.sql` — tablas `users`, `cars`, `car_images`, `favorites` con constraints e índices (`cars.status`, `cars.owner_id`, `cars.price`). SQL compatible con H2 y PostgreSQL.
+- `V1__esquema.sql` — tablas `users`, `cars`, `car_images`, `favorites` con constraints e índices (`cars.status`, `cars.owner_id`, `cars.price`). SQL compatible con PostgreSQL y H2 (tests).
 - `V2__datos_iniciales.sql` — usuarios de demostración (inserciones idempotentes).
+- `V3`–`V6` — base de conocimiento de modelos (`model_scores`): ~300 fichas de 46 marcas con las puntuaciones que se asignan automáticamente a los anuncios.
 
 Hibernate arranca en modo `validate` en todos los perfiles: **Flyway es la única fuente del esquema**. Los tests (H2 en memoria) también ejecutan las migraciones, así que cualquier desajuste entre el SQL y las entidades rompe la suite.
 
@@ -186,7 +194,8 @@ DELETE /api/cars/{id}                Borrar coche             [dueño o ADMIN]
 
 ## Dónde tocar cada cosa
 
-- **Añadir/editar coches de ejemplo** → `backend/.../config/DataLoader.java` (o por API con el usuario admin). Si cambias el seed, borra `backend/data/` para regenerarla.
+- **Añadir/editar coches de ejemplo** → `backend/.../config/DataLoader.java` (o por API con el usuario admin). Si cambias el seed, resetea la BD de desarrollo: `docker compose --profile dev down -v`.
+- **Puntuaciones automáticas de los anuncios** → nueva migración sobre `model_scores` y lógica de resolución en `backend/.../service/ModelScoreService.java`.
 - **Esquema de la BD** → nueva migración `V3__...sql` en `backend/src/main/resources/db/migration/` (no editar las aplicadas).
 - **Precios de carburante, seguro e impuestos** → `backend/.../service/CarCosts.java`.
 - **Fórmula del TCO** → `backend/.../service/TcoService.java`.

@@ -9,6 +9,9 @@ dist/
 **/backend/data/
 **/backend/uploads/
 
+# Configuración local de herramientas
+.claude/
+
 # Variables de entorno (las plantillas .env.example si se versionan)
 .env
 .env.*

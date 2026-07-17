@@ -5,7 +5,7 @@
 - Frontend (React + Vite): `automatch/frontend`
 
 ## Stack
-- Backend: Spring Boot 3.4, Java 21, Spring Security con JWT (jjwt 0.12), JPA, base de datos H2 en desarrollo.
+- Backend: Spring Boot 3.4, Java 21, Spring Security con JWT (jjwt 0.12), JPA, PostgreSQL (dev y prod) con migraciones Flyway; H2 en memoria solo en tests.
 - Frontend: React 18 + Vite + react-router. JSX plano (sin TypeScript). CSS propio en `src/styles.css` (sin Tailwind ni otros frameworks de estilos).
 
 ## Estilo de código
@@ -30,6 +30,7 @@
   - `npm run build` en `automatch/frontend`
 
 ## Cómo arrancar el proyecto
+- Base de datos (una vez): `cd automatch && docker compose --profile dev up -d db-dev`
 - Backend: `cd automatch/backend && mvn spring-boot:run`
 - Frontend: `cd automatch/frontend && npm run dev`
 

@@ -46,6 +46,40 @@ services:
     depends_on:
       - backend
 
+  # ==========================================================================
+  # Servicios SOLO de desarrollo (docker compose --profile dev up -d)
+  # ==========================================================================
+
+  # PostgreSQL para `mvn spring-boot:run` (perfil dev de Spring).
+  # Credenciales fijas de desarrollo; datos en su propio volumen.
+  db-dev:
+    image: postgres:16
+    profiles: ["dev"]
+    environment:
+      POSTGRES_DB: automatch
+      POSTGRES_USER: automatch
+      POSTGRES_PASSWORD: automatch
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U automatch -d automatch"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Interfaz web para inspeccionar la BD de desarrollo (http://localhost:8081)
+  # Sistema: PostgreSQL · Servidor: db-dev · Usuario/contraseña/BD: automatch
+  adminer:
+    image: adminer
+    profiles: ["dev"]
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db-dev
+
 volumes:
   db-data:
+  db-dev-data:
   uploads:

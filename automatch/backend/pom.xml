@@ -46,18 +46,18 @@
             <version>2.7.0</version>
         </dependency>
 
-        <!-- Base de datos H2 (fichero local en desarrollo, sin instalar nada) -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- PostgreSQL (produccion) -->
+        <!-- PostgreSQL: base de datos de la aplicacion (desarrollo y produccion) -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- H2 SOLO para los tests (en memoria, rapidos y sin dependencias externas) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- Migraciones de esquema (H2 va incluido en flyway-core; PostgreSQL necesita su modulo) -->
