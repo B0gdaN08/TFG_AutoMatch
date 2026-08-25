@@ -28,9 +28,6 @@ import java.util.Map;
 @Service
 public class RecommendationService {
 
-    /** Orden canonico de los criterios del recomendador. */
-    public static final List<String> CRITERIA = RankingAlgorithm.CRITERIA;
-
     private final CarRepository carRepository;
     private final WeightedSumAlgorithm weightedSumAlgorithm;
     private final TopsisAlgorithm topsisAlgorithm;
@@ -77,13 +74,13 @@ public class RecommendationService {
     private Map<String, Double> normalizeWeights(Map<String, Double> input) {
         Map<String, Double> weights = new LinkedHashMap<>();
         double sum = 0;
-        for (String criterion : CRITERIA) {
+        for (String criterion : RankingAlgorithm.CRITERIA) {
             double value = input == null ? 0 : Math.max(0, input.getOrDefault(criterion, 0.0));
             weights.put(criterion, value);
             sum += value;
         }
         if (sum == 0) {
-            CRITERIA.forEach(criterion -> weights.put(criterion, 1.0));
+            RankingAlgorithm.CRITERIA.forEach(criterion -> weights.put(criterion, 1.0));
         }
         return weights;
     }

@@ -1,7 +1,6 @@
 package es.urjc.automatch.config;
 
 import es.urjc.automatch.model.Car;
-import es.urjc.automatch.model.CarStatus;
 import es.urjc.automatch.model.CarType;
 import es.urjc.automatch.model.User;
 import es.urjc.automatch.repository.CarRepository;
@@ -45,19 +44,11 @@ public class DataLoader {
                 seedCars(cars);
             }
 
-            // Migracion: los coches creados antes de anadir el campo "status" tienen NULL.
-            for (Car car : cars.findAll()) {
-                if (car.getStatus() == null) {
-                    car.setStatus(CarStatus.APPROVED);
-                    cars.save(car);
-                }
-            }
-
             // Coches sin fotos: foto real del modelo si esta en el catalogo oficial,
             // o imagen generica segun su tipo en caso contrario.
             for (Car car : cars.findAll()) {
                 if (car.getImageUrls().isEmpty()) {
-                    String slug = REAL_PHOTOS.get(car.getId());
+                    String slug = REAL_PHOTOS.get(car.getBrand() + " " + car.getModel());
                     if (slug != null && car.getOwnerId() == null) {
                         car.setImageUrls(List.of("/images/cars/real/" + slug + ".jpg"));
                     } else {
@@ -168,35 +159,37 @@ public class DataLoader {
         return "/images/cars/" + type.name().toLowerCase() + ".svg";
     }
 
-    // Foto real del modelo (Wikimedia Commons) para cada coche del catalogo oficial, indexada por id.
-    private static final Map<Long, String> REAL_PHOTOS = Map.ofEntries(
-            Map.entry(1L, "dacia-sandero"),
-            Map.entry(2L, "renault-clio"),
-            Map.entry(3L, "peugeot-208"),
-            Map.entry(4L, "toyota-yaris"),
-            Map.entry(5L, "opel-corsa"),
-            Map.entry(6L, "citroen-c3"),
-            Map.entry(7L, "seat-ibiza"),
-            Map.entry(8L, "renault-5"),
-            Map.entry(9L, "seat-leon"),
-            Map.entry(10L, "volkswagen-golf"),
-            Map.entry(11L, "toyota-corolla"),
-            Map.entry(12L, "mazda-3"),
-            Map.entry(13L, "mg-mg4"),
-            Map.entry(14L, "bmw-serie-1"),
-            Map.entry(15L, "audi-a3"),
-            Map.entry(16L, "skoda-octavia"),
-            Map.entry(17L, "tesla-model-3"),
-            Map.entry(18L, "dacia-jogger"),
-            Map.entry(19L, "mazda-cx-30"),
-            Map.entry(20L, "hyundai-tucson"),
-            Map.entry(21L, "kia-sportage"),
-            Map.entry(22L, "nissan-qashqai"),
-            Map.entry(23L, "dacia-duster"),
-            Map.entry(24L, "ford-puma"),
-            Map.entry(25L, "peugeot-3008"),
-            Map.entry(26L, "kia-ev3"),
-            Map.entry(27L, "cupra-formentor"),
-            Map.entry(28L, "skoda-kodiaq")
+    // Foto real del modelo (Wikimedia Commons) para cada coche del catalogo oficial,
+    // indexada por "marca modelo" (no por id: asi las fotos no se cruzan aunque
+    // cambie el orden de insercion o se borre y re-siembre el catalogo).
+    private static final Map<String, String> REAL_PHOTOS = Map.ofEntries(
+            Map.entry("Dacia Sandero", "dacia-sandero"),
+            Map.entry("Renault Clio E-Tech", "renault-clio"),
+            Map.entry("Peugeot 208", "peugeot-208"),
+            Map.entry("Toyota Yaris Hybrid", "toyota-yaris"),
+            Map.entry("Opel Corsa", "opel-corsa"),
+            Map.entry("Citroen C3", "citroen-c3"),
+            Map.entry("Seat Ibiza", "seat-ibiza"),
+            Map.entry("Renault 5 E-Tech", "renault-5"),
+            Map.entry("Seat León", "seat-leon"),
+            Map.entry("Volkswagen Golf", "volkswagen-golf"),
+            Map.entry("Toyota Corolla 140H", "toyota-corolla"),
+            Map.entry("Mazda 3 e-Skyactiv G", "mazda-3"),
+            Map.entry("MG MG4", "mg-mg4"),
+            Map.entry("BMW Serie 1 118", "bmw-serie-1"),
+            Map.entry("Audi A3 Sportback", "audi-a3"),
+            Map.entry("Skoda Octavia", "skoda-octavia"),
+            Map.entry("Tesla Model 3", "tesla-model-3"),
+            Map.entry("Dacia Jogger", "dacia-jogger"),
+            Map.entry("Mazda CX-30 e-Skyactiv G", "mazda-cx-30"),
+            Map.entry("Hyundai Tucson HEV", "hyundai-tucson"),
+            Map.entry("Kia Sportage HEV", "kia-sportage"),
+            Map.entry("Nissan Qashqai", "nissan-qashqai"),
+            Map.entry("Dacia Duster", "dacia-duster"),
+            Map.entry("Ford Puma", "ford-puma"),
+            Map.entry("Peugeot 3008 Hybrid", "peugeot-3008"),
+            Map.entry("Kia EV3", "kia-ev3"),
+            Map.entry("Cupra Formentor e-Hybrid", "cupra-formentor"),
+            Map.entry("Skoda Kodiaq TDI", "skoda-kodiaq")
     );
 }

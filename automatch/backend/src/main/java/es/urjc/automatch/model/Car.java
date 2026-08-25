@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Ficha de un coche del mercado espanol.
  * consumption: l/100km (gasolina/diesel/hibridos) o kWh/100km (electricos).
- * depreciation5y: fraccion del precio que se pierde a los 5 anos (0.55 = pierde el 55%).
+ * depreciation5y: fraccion del precio que se pierde a los 5 años (0.55 = pierde el 55%).
  * reliability / safety / equipment: puntuaciones 1-10.
  */
 @Entity

@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -89,5 +91,28 @@ class ValidationTest {
                         .content(objectMapper.writeValueAsString(coche)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").isNotEmpty());
+    }
+
+    @Test
+    void unaRutaInexistenteDevuelve404NoUn500() throws Exception {
+        mockMvc.perform(get("/api/loquesea"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").isNotEmpty());
+    }
+
+    @Test
+    void unMetodoNoSoportadoDevuelve405() throws Exception {
+        mockMvc.perform(patch("/api/cars/1")
+                        .header("Authorization", "Bearer " + demoToken))
+                .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    void unContentTypeNoSoportadoDevuelve415() throws Exception {
+        mockMvc.perform(post("/api/cars")
+                        .header("Authorization", "Bearer " + demoToken)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("no es json"))
+                .andExpect(status().isUnsupportedMediaType());
     }
 }

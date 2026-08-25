@@ -91,22 +91,6 @@ public class CarController {
         return carService.toResponseList(carService.findAllApproved(), email, isAdmin);
     }
 
-    @Operation(summary = "Comparar coches", description = "Devuelve los datos de 2 o 3 coches para compararlos lado a lado")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Coches encontrados"),
-            @ApiResponse(responseCode = "400", description = "Número de coches a comparar fuera de rango (2-3)")
-    })
-    @GetMapping("/compare")
-    public List<CarResponse> compare(@RequestParam List<Long> ids, Authentication auth) {
-        if (ids.size() < 2 || ids.size() > 3) {
-            throw new IllegalArgumentException("Selecciona entre 2 y 3 coches para comparar");
-        }
-        String email = AuthUtils.emailOrNull(auth);
-        boolean isAdmin = AuthUtils.isAdmin(auth);
-        var cars = carService.findVisibleByIds(ids, email, isAdmin);
-        return carService.toResponseList(cars, email, isAdmin);
-    }
-
     // --- Anuncios de usuarios ---
 
     @Operation(summary = "Mis anuncios", description = "Devuelve los anuncios publicados por el usuario autenticado")

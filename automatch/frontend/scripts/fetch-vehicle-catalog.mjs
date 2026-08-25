@@ -54,7 +54,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_PATH = path.join(__dirname, '..', 'src', 'data', 'vehicleCatalog.json');
 
 const ENDPOINT = 'https://query.wikidata.org/sparql';
-const USER_AGENT = 'AutomatchTFG/1.0 (educational project; contact: bogdan.maran.bm@gmail.com)';
+// Wikidata pide identificar la aplicacion con un contacto. Se toma de la variable
+// de entorno CATALOG_CONTACT para no publicar un correo personal en el repositorio.
+const CONTACT = process.env.CATALOG_CONTACT || 'contacto@example.org';
+const USER_AGENT = `AutomatchTFG/1.0 (proyecto educativo; contact: ${CONTACT})`;
 
 // "Modelo de automóvil" en Wikidata.
 const AUTOMOBILE_MODEL = 'Q3231690';

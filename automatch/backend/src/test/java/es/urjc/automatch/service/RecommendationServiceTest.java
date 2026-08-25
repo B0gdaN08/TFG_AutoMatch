@@ -8,6 +8,7 @@ import es.urjc.automatch.model.CarStatus;
 import es.urjc.automatch.model.CarType;
 import es.urjc.automatch.model.FuelType;
 import es.urjc.automatch.repository.CarRepository;
+import es.urjc.automatch.service.ranking.RankingAlgorithm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -127,7 +128,7 @@ class RecommendationServiceTest {
 
         Map<String, Double> pesosCero = new HashMap<>();
         Map<String, Double> pesosUniformes = new HashMap<>();
-        for (String criterio : RecommendationService.CRITERIA) {
+        for (String criterio : RankingAlgorithm.CRITERIA) {
             pesosCero.put(criterio, 0.0);
             pesosUniformes.put(criterio, 1.0);
         }

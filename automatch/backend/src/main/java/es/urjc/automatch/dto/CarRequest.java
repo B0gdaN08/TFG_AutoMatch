@@ -38,7 +38,7 @@ public record CarRequest(
         @NotNull(message = "El combustible es obligatorio")
         FuelType fuel,
 
-        @Pattern(regexp = "C|ECO|CERO", message = "La etiqueta DGT debe ser C, ECO o CERO")
+        @Pattern(regexp = "B|C|ECO|CERO", message = "La etiqueta DGT debe ser B, C, ECO o CERO")
         String dgtLabel,
 
         @Positive(message = "El consumo debe ser mayor que 0")

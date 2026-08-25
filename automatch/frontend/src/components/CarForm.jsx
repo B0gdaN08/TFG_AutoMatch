@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { request, FUEL_LABELS, TYPE_LABELS, MAX_IMAGES, imageUrl, uploadImage } from '../api';
 
-const DGT_LABELS = ['C', 'ECO', 'CERO'];
+const DGT_LABELS = ['B', 'C', 'ECO', 'CERO'];
 
 const EMPTY_FORM = {
   brand: '',
@@ -86,7 +86,7 @@ export default function CarForm({ initialValue, onSubmit, submitLabel = 'Guardar
         }
       })
       .catch(() => setCatalog([])); // sin catálogo, el formulario cae a campos libres
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Solo al montar (o al cambiar de modo): initialValue solo se lee la primera vez
   }, [sellerMode]);
 
   const brandModels = catalog.find((b) => b.brand === values.brand)?.models ?? [];

@@ -171,8 +171,8 @@ export default function Tco() {
           </div>
 
           <p className="hint muted">
-            Estimación con precios medios de carburante y electricidad en España;
-            puedes ajustar las constantes en el backend (CarCosts.java).
+            Estimación basada en precios medios de carburante, electricidad,
+            seguro e impuestos en España. Las cifras son orientativas.
           </p>
         </div>
       )}

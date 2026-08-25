@@ -950,6 +950,7 @@ textarea:focus {
   padding: 3px 10px;
 }
 
+.chip-dgt-B { background: #c8a200; }
 .chip-dgt-C { background: var(--dgt-c); }
 .chip-dgt-ECO { background: var(--dgt-eco); }
 .chip-dgt-CERO { background: var(--dgt-cero); }

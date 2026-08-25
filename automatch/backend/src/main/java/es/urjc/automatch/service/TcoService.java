@@ -22,7 +22,7 @@ public class TcoService {
 
     public TcoResult calculate(Long carId, int years, int kmPerYear, String email, boolean isAdmin) {
         if (years < 1 || years > 15) {
-            throw new IllegalArgumentException("El periodo debe estar entre 1 y 15 anos");
+            throw new IllegalArgumentException("El periodo debe estar entre 1 y 15 años");
         }
         if (kmPerYear < 1000 || kmPerYear > 100000) {
             throw new IllegalArgumentException("Los km anuales deben estar entre 1.000 y 100.000");

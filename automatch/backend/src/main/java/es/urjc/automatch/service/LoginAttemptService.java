@@ -1,5 +1,6 @@
 package es.urjc.automatch.service;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -39,6 +40,15 @@ public class LoginAttemptService {
 
     public void onSuccessfulLogin(String email, String ip) {
         attemptsByKey.remove(key(email, ip));
+    }
+
+    /**
+     * Purga periodica de entradas caducadas: sin ella el mapa creceria
+     * indefinidamente con cada combinacion email+IP fallida.
+     */
+    @Scheduled(fixedDelayString = "PT30M")
+    public void purgeExpired() {
+        attemptsByKey.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
 
     private String key(String email, String ip) {

@@ -136,7 +136,6 @@ export default function Recomendador() {
       calculate(buildBody());
     }
     // Solo al montar: el estado inicial ya viene de la URL
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function syncUrl() {

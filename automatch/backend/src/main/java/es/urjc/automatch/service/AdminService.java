@@ -53,7 +53,7 @@ public class AdminService {
 
     public UserSummary updateRole(Long id, String role, String currentEmail) {
         if (!VALID_ROLES.contains(role)) {
-            throw new IllegalArgumentException("Rol no valido: " + role);
+            throw new IllegalArgumentException("Rol no válido: " + role);
         }
         User target = userById(id);
         User current = userByEmail(currentEmail);

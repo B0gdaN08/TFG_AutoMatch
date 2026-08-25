@@ -47,7 +47,7 @@ class AuthFlowTest {
     }
 
     @Test
-    void elLoginConContrasenaIncorrectaDevuelve400() throws Exception {
+    void elLoginConContrasenaIncorrectaDevuelve401() throws Exception {
         Map<String, String> request = Map.of(
                 "email", "demo@automatch.es",
                 "password", "contraseñaIncorrecta");
@@ -55,8 +55,20 @@ class AuthFlowTest {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").isNotEmpty());
+    }
+
+    @Test
+    void elLoginNormalizaElEmailAMinusculas() throws Exception {
+        // "Demo@automatch.es" y "demo@automatch.es" son la misma cuenta
+        Map<String, String> request = Map.of("email", "Demo@Automatch.es", "password", "demo123");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty());
     }
 
     @Test

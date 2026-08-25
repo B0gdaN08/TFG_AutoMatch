@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -68,6 +72,34 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
     public Map<String, String> tooManyAttempts(TooManyAttemptsException e) {
         return body(e.getMessage(), "Demasiados intentos. Inténtalo de nuevo más tarde.");
+    }
+
+    /** Credenciales incorrectas en el login. */
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Map<String, String> badCredentials(BadCredentialsException e) {
+        return body(e.getMessage(), "Email o contraseña incorrectos");
+    }
+
+    /** Ruta inexistente: 404 limpio, sin stack trace en el log. */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> routeNotFound(NoResourceFoundException e) {
+        return body(null, "No encontrado");
+    }
+
+    /** Metodo HTTP no soportado en una ruta que existe (p. ej. PATCH). */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public Map<String, String> methodNotAllowed(HttpRequestMethodNotSupportedException e) {
+        return body(null, "Método no permitido");
+    }
+
+    /** Content-Type no soportado (p. ej. XML en un endpoint JSON). */
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+    public Map<String, String> mediaTypeNotSupported(HttpMediaTypeNotSupportedException e) {
+        return body(null, "Tipo de contenido no soportado");
     }
 
     /** Cualquier otro error no controlado: no se filtra al cliente, solo se registra en el log. */

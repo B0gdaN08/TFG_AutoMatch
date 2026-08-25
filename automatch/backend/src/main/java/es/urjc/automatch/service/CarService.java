@@ -109,10 +109,6 @@ public class CarService {
         return car;
     }
 
-    public List<Car> findVisibleByIds(List<Long> ids, String email, boolean isAdmin) {
-        return ids.stream().map(id -> findVisibleById(id, email, isAdmin)).toList();
-    }
-
     /** Anuncios publicados por el usuario, en cualquier estado. */
     public List<Car> findMine(String email) {
         User user = userByEmail(email);

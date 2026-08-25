@@ -35,7 +35,7 @@ automatch/
 │   ├── Dockerfile            # build multi-stage: Maven → JRE 21 alpine
 │   └── src/main/
 │       ├── java/es/urjc/automatch/
-│       │   ├── model/            # Entidades JPA (Car, User, Favorite)
+│       │   ├── model/            # Entidades JPA (Car, User, Favorite, ModelScore)
 │       │   ├── repository/       # Spring Data + Specifications
 │       │   ├── service/          # Lógica: TCO, recomendador, auth, costes
 │       │   ├── controller/       # Endpoints REST
@@ -178,25 +178,35 @@ El propio `docker-compose.yml` sirve tal cual: clona el repo, crea `.env` con un
 POST   /api/auth/register            Registro (devuelve JWT)
 POST   /api/auth/login               Login (devuelve JWT)
 GET    /api/cars                     Catálogo paginado (?search&type&fuel&minPrice&maxPrice&dgtLabel&page&size&sort)
-GET    /api/cars/all                 Lista completa (selects de comparador/TCO)
+GET    /api/cars/all                 Lista completa (selects de comparador/TCO/Home)
+GET    /api/cars/models              Marcas y modelos de la base de conocimiento (formulario de venta)
 GET    /api/cars/{id}                Ficha de un coche
-GET    /api/cars/compare?ids=1,2,3   Comparador (2-3 coches)
+GET    /api/cars/{id}/contact        Contacto del vendedor de un anuncio aprobado   [auth]
 GET    /api/tco/{carId}?years&km     Coste total de propiedad
 POST   /api/recommendations          Ranking multicriterio (pesos + filtros + method)
-GET    /api/favorites                Favoritos del usuario   [auth]
-POST   /api/favorites/{carId}        Añadir favorito          [auth]
-DELETE /api/favorites/{carId}        Quitar favorito          [auth]
-POST   /api/cars                     Publicar anuncio         [auth]
-PUT    /api/cars/{id}/approve        Aprobar anuncio          [ADMIN]
-PUT    /api/cars/{id}                Editar coche             [ADMIN]
-DELETE /api/cars/{id}                Borrar coche             [dueño o ADMIN]
+GET    /api/favorites                Favoritos del usuario                          [auth]
+POST   /api/favorites/{carId}        Añadir favorito                                [auth]
+DELETE /api/favorites/{carId}        Quitar favorito                                [auth]
+POST   /api/cars                     Publicar anuncio (puntuaciones automáticas)    [auth]
+PUT    /api/cars/{id}                Editar coche (dueño → re-moderación; admin → sin cambio de estado)
+DELETE /api/cars/{id}                Borrar coche                                   [dueño o ADMIN]
+GET    /api/cars/mine                Mis anuncios                                   [auth]
+GET    /api/cars/pending             Anuncios pendientes de moderación              [ADMIN]
+POST   /api/cars/catalog             Añadir coche al catálogo oficial               [ADMIN]
+PUT    /api/cars/{id}/approve        Aprobar anuncio                                [ADMIN]
+PUT    /api/cars/{id}/reject         Rechazar anuncio                               [ADMIN]
+POST   /api/cars/images              Subir foto de un coche                         [auth]
+GET    /api/admin/users              Listar usuarios                                [ADMIN]
+PUT    /api/admin/users/{id}/role    Cambiar rol de un usuario                      [ADMIN]
+DELETE /api/admin/users/{id}         Eliminar usuario                               [ADMIN]
+GET    /api/admin/stats              Estadísticas globales                          [ADMIN]
 ```
 
 ## Dónde tocar cada cosa
 
 - **Añadir/editar coches de ejemplo** → `backend/.../config/DataLoader.java` (o por API con el usuario admin). Si cambias el seed, resetea la BD de desarrollo: `docker compose --profile dev down -v`.
 - **Puntuaciones automáticas de los anuncios** → nueva migración sobre `model_scores` y lógica de resolución en `backend/.../service/ModelScoreService.java`.
-- **Esquema de la BD** → nueva migración `V3__...sql` en `backend/src/main/resources/db/migration/` (no editar las aplicadas).
+- **Esquema de la BD** → nueva migración `V7__...sql` en `backend/src/main/resources/db/migration/` (la última aplicada es la V6; no editar las anteriores).
 - **Precios de carburante, seguro e impuestos** → `backend/.../service/CarCosts.java`.
 - **Fórmula del TCO** → `backend/.../service/TcoService.java`.
 - **Algoritmos del recomendador** → `backend/.../service/ranking/` (`WeightedSumAlgorithm`, `TopsisAlgorithm`).
@@ -209,10 +219,17 @@ DELETE /api/cars/{id}                Borrar coche             [dueño o ADMIN]
 2. ~~Migrar a PostgreSQL + Docker Compose~~ ✅
 3. ~~Tests unitarios y de integración con cobertura~~ ✅ (JaCoCo + Vitest)
 4. ~~Filtros con JPA Specifications + paginación~~ ✅
-5. **Panel de administración** en el frontend (el backend ya está listo).
-6. Importar precios reales (API/CSV) y gráficas de evolución.
-7. Guardar y compartir comparativas y resultados del recomendador.
-8. Despliegue en la nube (Render/Railway + Vercel) para la demo del tribunal.
+5. ~~Panel de administración en el frontend~~ ✅ (moderación, CRUD de coches y gestión de usuarios)
+6. ~~Puntuaciones automáticas de los anuncios desde una base de conocimiento~~ ✅ (`ModelScore`)
+7. Importar precios reales (API/CSV) y gráficas de evolución.
+8. Guardar y compartir comparativas y resultados del recomendador.
+9. Importar puntuaciones desde fuentes externas (Euro NCAP, informes de fiabilidad) a `model_scores`.
+10. Despliegue en la nube (Render/Railway + Vercel) para la demo del tribunal.
+
+## Créditos y licencias
+
+Las fuentes de datos e imágenes (fotos del catálogo, Euro NCAP, Wikidata) se
+detallan en [ATRIBUCIONES.md](ATRIBUCIONES.md).
 
 ---
 

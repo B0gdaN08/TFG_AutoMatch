@@ -45,7 +45,7 @@ public class ImageStorageService {
 
     public String store(MultipartFile file) throws IOException {
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("El archivo esta vacio");
+            throw new IllegalArgumentException("El archivo está vacío");
         }
         String declaredExtension = EXTENSIONS.get(file.getContentType());
         if (declaredExtension == null) {

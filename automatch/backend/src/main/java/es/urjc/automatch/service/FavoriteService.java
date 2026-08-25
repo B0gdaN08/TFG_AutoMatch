@@ -1,6 +1,7 @@
 package es.urjc.automatch.service;
 
 import es.urjc.automatch.model.Car;
+import es.urjc.automatch.model.CarStatus;
 import es.urjc.automatch.model.Favorite;
 import es.urjc.automatch.model.User;
 import es.urjc.automatch.repository.FavoriteRepository;
@@ -30,15 +31,23 @@ public class FavoriteService {
                 .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado"));
     }
 
+    /**
+     * Solo se listan favoritos APPROVED: si un anuncio vuelve a moderacion
+     * (o se rechaza), desaparece de los favoritos ajenos en lugar de mostrar
+     * una tarjeta cuya ficha daria 404. El favorito se conserva y reaparece
+     * si el anuncio se re-aprueba.
+     */
     public List<Car> list(String email) {
         return favoriteRepository.findByUser(userByEmail(email)).stream()
                 .map(Favorite::getCar)
+                .filter(car -> car.getStatus() == CarStatus.APPROVED)
                 .toList();
     }
 
     public void add(String email, Long carId) {
         User user = userByEmail(email);
-        Car car = carService.findById(carId);
+        // Visibilidad: no se puede marcar por id un anuncio PENDING/REJECTED ajeno
+        Car car = carService.findVisibleById(carId, email, false);
         if (!favoriteRepository.existsByUserIdAndCarId(user.getId(), car.getId())) {
             favoriteRepository.save(new Favorite(user, car));
         }
